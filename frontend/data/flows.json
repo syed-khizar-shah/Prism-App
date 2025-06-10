@@ -1,0 +1,32 @@
+{
+  "rx-flow": {
+    "flowId": "rx-flow",
+    "name": "RX Flow",
+    "startStepId": "age-group",
+    "steps": {
+      "age-group": {
+        "title": "Select Age Group",
+        "type": "single-select",
+        "basePrice": 0,
+        "options": [
+          { "id": "under18", "label": "Under 18", "price": 0 },
+          { "id": "18to40", "label": "18–40", "price": 0 },
+          { "id": "40to60", "label": "40–60", "price": 10 },
+          { "id": "60plus", "label": "60+", "price": 15 }
+        ],
+        "next": "lens-type"
+      },
+      "lens-type": {
+        "title": "Select Lens Type",
+        "type": "single-select",
+        "basePrice": 20,
+        "options": [
+          { "id": "single", "label": "Single Vision", "price": 0 },
+          { "id": "bifocal", "label": "Bifocal", "price": 30 },
+          { "id": "progressive", "label": "Progressive", "price": 50 }
+        ],
+        "next": "power-range"
+      }
+    }
+  }
+}
