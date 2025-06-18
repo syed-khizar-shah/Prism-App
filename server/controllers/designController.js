@@ -33,6 +33,7 @@ exports.getDesignById = async (req, res) => {
     if (!design) return res.status(404).json({ error: 'Design not found' });
     res.json(design);
   } catch (err) {
+    console.err(err);
     res.status(500).json({ error: 'Server Error' });
   }
 };

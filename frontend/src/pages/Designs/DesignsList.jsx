@@ -4,9 +4,9 @@ import { Edit, Eye, EyeOff, Trash2, Plus, Calendar, Search, Filter } from 'lucid
 import { useNavigate } from 'react-router-dom';
 import { DeletionErrorModal } from '../../components/deletionErrorModal';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const DesignsList = () => {
+    const baseUrl = import.meta.env.VITE_APP_BASE_URL;
     const [designs, setDesigns] = useState([]);
     const [filteredDesigns, setFilteredDesigns] = useState([]);
     const [deletionError, setDeletionError] = useState(null);
@@ -20,6 +20,7 @@ const DesignsList = () => {
         try {
             setLoading(true);
             const res = await axios.get(`${baseUrl}/api/designs`);
+            console.log({res})
             const sortedDesigns = res.data.sort((a, b) => {
                 if (sortBy === 'updatedAt') {
                     return new Date(b.updatedAt) - new Date(a.updatedAt);
