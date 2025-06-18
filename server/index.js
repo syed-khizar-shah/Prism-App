@@ -60,6 +60,11 @@ app.use('/api/designs',designRoutes)
 //   res.json('not found')
 // })
 
+app.get('/', (req, res) => {
+  res.send('<h1>Welcome to OPTIX 2020 App server</h1>');
+});
+
+
 const port = process.env.PORT || 3000
 app.listen(port, () => {
   console.log(`Server started on port ${port}`)
