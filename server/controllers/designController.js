@@ -3,7 +3,7 @@ const Design = require('../models/DesignSchema');
 exports.getAllDesigns = async (req, res) => {
   try {
     const designs = await Design.find()
-      .populate('lensType recommendedLens coating')
+      .populate('lensType recommendedLens coatings')
       .populate({
         path: 'extras.extra',
         model: 'Extras'
@@ -21,7 +21,7 @@ exports.getAllDesigns = async (req, res) => {
 exports.getDesignById = async (req, res) => {
   try {
     const design = await Design.findById(req.params.id)
-      .populate('lensType recommendedLens coating')
+      .populate('lensType recommendedLens coatings')
       .populate({
         path: 'extras.extra',
         model: 'Extras'
@@ -51,7 +51,7 @@ exports.getDesignByLensPair = async (req, res) => {
     })
       .populate('lensType')
       .populate('recommendedLens')
-      .populate('coating')
+      .populate('coatings')
       .populate({
         path: 'extras.extra',
         model: 'Extras'
@@ -67,7 +67,7 @@ exports.getDesignByLensPair = async (req, res) => {
       })
         .populate('lensType')
         .populate('recommendedLens')
-        .populate('coating')
+        .populate('coatings')
         .populate({
           path: 'extras.extra',
           model: 'Extras'
@@ -80,6 +80,7 @@ exports.getDesignByLensPair = async (req, res) => {
 
     res.json(designs);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -100,8 +101,8 @@ exports.createDesign = async (req, res) => {
     }
 
     // Handle empty arrays for coating
-    if (Array.isArray(designData.coating) && designData.coating.length === 0) {
-      designData.coating = [];
+    if (Array.isArray(designData.coatings) && designData.coatings.length === 0) {
+      designData.coatings = [];
     }
 
     // Handle extras array - ensure proper structure
@@ -129,7 +130,7 @@ exports.createDesign = async (req, res) => {
     
     // Populate the created design before returning
     const populatedDesign = await Design.findById(design._id)
-      .populate('lensType recommendedLens coating')
+      .populate('lensType recommendedLens coatings')
       .populate({
         path: 'extras.extra',
         model: 'Extras'
@@ -185,7 +186,7 @@ exports.updateDesign = async (req, res) => {
       new: true,
       runValidators: true
     })
-      .populate('lensType recommendedLens coating')
+      .populate('lensType recommendedLens coatings')
       .populate({
         path: 'extras.extra',
         model: 'Extras'

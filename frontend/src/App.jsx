@@ -16,6 +16,7 @@ import DesignForm from './pages/Designs/DesignsForm';
 import Guide from './pages/Guide';
 // import LensConfigurator from './LensConfigurator/components/LensConfigurator';
 import LensConfigurator from './Configurator/LensConfigurator';
+import LensConfig from './TestConfig/LensConfig';
 
 
 const Layout = () => {
@@ -40,6 +41,12 @@ const router = createBrowserRouter([
         path: '/guide',
         element: (
           <Guide />
+        ),
+      },
+      {
+        path: '/test-flow',
+        element: (
+          <LensConfig />
         ),
       },
       {

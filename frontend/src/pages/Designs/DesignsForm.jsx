@@ -18,7 +18,7 @@ const DesignForm = () => {
         isVisible: true,
         lensType: '', // Changed to single selection
         recommendedLens: [], // Changed to single selection
-        coating: [],
+        coatings: [],
         extras: [] // Now array of { extra: id, colors: [colorIds] }
     });
 
@@ -32,7 +32,7 @@ const DesignForm = () => {
     const [submitStatus, setSubmitStatus] = useState(null);
 
     const fetchOptions = async () => {
-        const [lens, recommended, coating, extras, colors] = await Promise.all([
+        const [lens, recommended, coatings, extras, colors] = await Promise.all([
             axios.get(`${baseUrl}/api/lenses`),
             axios.get(`${baseUrl}/api/recommended-lenses`),
             axios.get(`${baseUrl}/api/coatings`),
@@ -41,7 +41,7 @@ const DesignForm = () => {
         ]);
         setLensList(lens.data);
         setRecommendedList(recommended.data);
-        setCoatingList(coating.data);
+        setCoatingList(coatings.data);
         setExtrasList(extras.data);
         setColorsList(colors.data);
     };
@@ -80,7 +80,7 @@ const DesignForm = () => {
                     recommendedLens: Array.isArray(res.data.recommendedLens)
                         ? res.data.recommendedLens.map(l => l._id || l)
                         : [],
-                    coating: res.data.coating?.map(item => item._id || item) || [],
+                    coatings: res.data.coatings?.map(item => item._id || item) || [],
                     isVisible: res.data.isVisible, // Add this line
                     extras: processedExtras
                 });
@@ -152,7 +152,7 @@ const DesignForm = () => {
         const { name, value } = e.target;
         setDesign(prev => ({
             ...prev,
-            [name]: name === 'price' ? parseFloat(value) || '' : value
+            [name]: name === 'price' ? (value === '' ? '' : parseFloat(value) || 0) : value
         }));
     };
 
@@ -231,7 +231,7 @@ const DesignForm = () => {
                     price: '',
                     lensType: '',
                     recommendedLens: '',
-                    coating: [],
+                    coatings: [],
                     extras: []
                 });
             }
@@ -513,7 +513,7 @@ const DesignForm = () => {
                 {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
             </div>
 
-            {renderMultiSelect('Coatings', coatingList, 'coating')}
+            {renderMultiSelect('Coatings', coatingList, 'coatings')}
             {renderExtrasWithColors()}
 
             <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Save Design</button>

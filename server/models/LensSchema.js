@@ -16,7 +16,7 @@ const lensSchema = new Schema({
   ageGroups: [{ type: Schema.Types.ObjectId, ref: "AgeGroup" }],
   powerLensMap: [powerLensMapSchema],
   subtypeOf: { type: Schema.Types.ObjectId, ref: "Lens", default: null },
-});
+},{timestamps:true});
 
 
 module.exports = mongoose.model('Lens', lensSchema);

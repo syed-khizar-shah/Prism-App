@@ -9,10 +9,10 @@ const designSchema = new Schema({
   description: { type: String },
   price: { type: Number, required: true, min: 0 },
   isVisible: { type: Boolean, default: true },
-  coating: [{ type: Schema.Types.ObjectId, ref: 'Coating' }],
+  coatings: [{ type: Schema.Types.ObjectId, ref: 'Coating' }],
   extras: [{
     extra: { type: Schema.Types.ObjectId, ref: 'Extras', required: true },
     colors: [{ type: Schema.Types.ObjectId, ref: 'Color' }] // References to Color documents
-  }]});
+  }]},{timestamps:true});
 
 module.exports = mongoose.model('Design',designSchema)

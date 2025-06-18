@@ -473,7 +473,7 @@ export default function LensConfigurator() {
                   name={extra.name}
                   price={extra.price}
                   bgColor="bg-orange-50"
-                  extraInfo={selectedColors[extra._id] ? `(${selectedColors[extra._id].name})` : ''}
+                  extraInfo={selectedColors[extra._id] ? (`${selectedColors[extra._id].name}`) : ''}
                 />
               ))}
 
