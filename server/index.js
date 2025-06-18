@@ -56,14 +56,14 @@ app.use('/api/designs',designRoutes)
 
 
 
-// app.use('*', (req, res) => {
-//   res.json('not found')
-// })
 
 app.get('/', (req, res) => {
   res.send('<h1>Welcome to OPTIX 2020 App server</h1>');
 });
 
+app.use('*', (req, res) => {
+  res.json('not found')
+})
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
