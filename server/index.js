@@ -57,12 +57,12 @@ app.use('/api/designs',designRoutes)
 
 
 
-app.get('/', (req, res) => {
-  res.send('<h1>Welcome to OPTIX 2020 App server</h1>');
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to Masjid App API V2" });
 });
 
-app.use('*', (req, res) => {
-  res.json('not found')
+app.use((req, res) => {
+  res.status(404).json({error:'not found'})
 })
 
 const port = process.env.PORT || 3000
