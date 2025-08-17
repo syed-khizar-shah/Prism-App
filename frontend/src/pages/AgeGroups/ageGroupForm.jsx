@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Check, X } from 'lucide-react'
 import ImageUploader from '../../components/imageUploader'
 
 const baseUrl = import.meta.env.VITE_APP_BASE_URL
 
-const AgeGroupForm = ({ onSaved, initialData }) => {
+const AgeGroupForm = ({ onSaved, initialData, onCancel }) => {
     const [ageGroup, setAgeGroup] = useState({ name: '', image: '' })
     const [errors, setErrors] = useState({})
     const [submitStatus, setSubmitStatus] = useState(null)
@@ -64,57 +65,91 @@ const AgeGroupForm = ({ onSaved, initialData }) => {
         }
     }
 
+    const handleCancel = () => {
+        setAgeGroup({ name: '', image: '' })
+        setErrors({})
+        setSubmitStatus(null)
+        onCancel()
+    }
+
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="mx-auto p-6 bg-white rounded-lg shadow-md space-y-5"
-        >
-            <div>
-                <label className="block mb-1 font-semibold text-gray-700">Name</label>
-                <input
-                    type="text"
-                    name="name"
-                    value={ageGroup.name}
-                    onChange={handleChange}
-                    placeholder="e.g. Children, Adults"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
+            <div className="border-b border-gray-100 pb-4 mb-6">
+                <h2 className="text-xl font-medium text-gray-900">
+                    {initialData ? 'Edit Age Group' : 'Create New Age Group'}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                    {initialData ? 'Modify the existing age group details' : 'Fill in the details to create a new age group'}
+                </p>
             </div>
-
-            <div>
-                <label className="block mb-2 font-semibold text-gray-700">Image</label>
-                {/* Show preview of current image */}
-                {ageGroup.image && (
-                    <div className="my-6 bg-white overflow-hidden">
-                        <div className="p-4">
-                            <div className="relative inline-block">
-                                <img
-                                    src={ageGroup.image}
-                                    alt="Preview"
-                                    className="max-w-full h-auto max-h-96 rounded-md shadow-sm border border-gray-200"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <ImageUploader onUpload={handleImageUpload} initialImage={ageGroup.image} />
-                {errors.image && <p className="text-red-600 text-sm mt-1">{errors.image}</p>}
-            </div>
-
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded-md font-semibold transition"
-            >
-                {loading ? (initialData ? 'Updating...' : 'Saving...') : (initialData ? 'Update Age Group' : 'Save Age Group')}
-            </button>
 
             {submitStatus && (
-                <p className="text-center text-sm mt-3 text-gray-800">{submitStatus}</p>
+                <div className={`mb-6 p-4 rounded-md border-l-4 ${
+                    submitStatus.includes('Error') 
+                        ? 'bg-red-50 border-red-400 text-red-700'
+                        : 'bg-green-50 border-green-400 text-green-700'
+                }`}>
+                    <p className="text-sm">{submitStatus}</p>
+                </div>
             )}
-        </form>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Age Group Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={ageGroup.name}
+                            onChange={handleChange}
+                            placeholder="e.g. Children, Adults"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                            required
+                        />
+                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Image <span className="text-red-500">*</span>
+                    </label>
+                    {ageGroup.image && (
+                        <div className="mb-4">
+                            <img src={ageGroup.image} alt="Age Group" className="max-h-48 rounded-md border border-gray-200" />
+                        </div>
+                    )}
+                    <ImageUploader onUpload={handleImageUpload} initialImage={ageGroup.image} />
+                    {errors.image && <p className="text-red-500 text-sm mt-1">{errors.image}</p>}
+                </div>
+
+                <div className="pt-6 border-t border-gray-100 flex gap-3">
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-gray-900 text-white px-6 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                    >
+                        {loading ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                            <Check className="w-4 h-4" />
+                        )}
+                        {initialData ? 'Update' : 'Create'} Age Group
+                    </button>
+                    
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="border border-gray-300 text-gray-700 px-6 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 flex items-center gap-2 transition-colors"
+                    >
+                        <X className="w-4 h-4" />
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
     )
 }
 

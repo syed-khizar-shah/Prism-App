@@ -347,7 +347,7 @@ export default function LensConfigurator() {
       <div className="flex">
         {/* Main Content */}
         <div className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Lens Design Configurator</h1>
@@ -393,11 +393,10 @@ export default function LensConfigurator() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-80 bg-white border-l border-gray-200 p-6">
+        {/* <div className="w-80 bg-white border-l border-gray-200 p-6">
           <div className="sticky top-6">
             <h3 className="font-semibold text-lg mb-4">Configuration Summary</h3>
 
-            {/* Price Display */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <div className="text-center">
                 <div className="text-sm text-blue-600 mb-1">Total Price</div>
@@ -405,7 +404,6 @@ export default function LensConfigurator() {
               </div>
             </div>
 
-            {/* Selection Summary */}
             <div className="space-y-3 text-sm">
               {selections.ageGroup && (
                 <SummaryItem
@@ -435,7 +433,7 @@ export default function LensConfigurator() {
                 <SummaryItem
                   label="Power Range"
                   name={`${selections.powerMap.min} - ${selections.powerMap.max}`}
-                  price={0} // Power ranges typically don't have prices
+                  price={0} 
                   bgColor="bg-green-50"
                 />
               )}
@@ -484,7 +482,7 @@ export default function LensConfigurator() {
               )}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

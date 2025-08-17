@@ -1,6 +1,6 @@
 // controllers/colorController.js
 const Color = require('../models/ColorSchema');
-const Extra = require('../models/ExtrasSchema'); // make sure to import this if not already
+const Design = require('../models/DesignSchema'); // make sure to import this if not already
 
 
 // Create new color
@@ -53,12 +53,12 @@ exports.deleteColor = async (req, res) => {
     const colorId = req.params.id;
 
     // Check if the color is referenced in any Extra
-    const referencingExtras = await Extra.find({ colors: colorId }, '_id');
+    const referencingDesigns = await Design.find({ colors: colorId }, '_id');
 
-    if (referencingExtras.length > 0) {
+    if (referencingDesigns.length > 0) {
       return res.status(409).json({
-        message: `Cannot delete. This color is used in ${referencingExtras.length} extras.`,
-        references: referencingExtras.map(e => e._id)
+        message: `Cannot delete. This color is used in ${referencingDesigns.length} design.`,
+        references: referencingDesigns.map(e => e._id)
       });
     }
 

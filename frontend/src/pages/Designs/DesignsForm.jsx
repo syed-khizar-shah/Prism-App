@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import ImageUploader from '../../components/imageUploader';
-import { Check, Eye, EyeOff, Plus, X } from 'lucide-react';
+import { Check, Eye, EyeOff, Plus, X, ArrowLeft } from 'lucide-react';
 
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
@@ -30,6 +30,7 @@ const DesignForm = () => {
     const [colorsList, setColorsList] = useState([]);
     const [errors, setErrors] = useState({});
     const [submitStatus, setSubmitStatus] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const fetchOptions = async () => {
         const [lens, recommended, coatings, extras, colors] = await Promise.all([
@@ -214,6 +215,9 @@ const DesignForm = () => {
         console.log({ design });
         if (!validate()) return;
 
+        setLoading(true);
+        setSubmitStatus(null);
+
         // Filter out extras that don't have an extra selected
         const cleanedExtras = design.extras.filter(item => item.extra);
         const designToSubmit = { ...design, extras: cleanedExtras };
@@ -239,17 +243,26 @@ const DesignForm = () => {
         } catch (err) {
             const msg = err.response?.data?.message || err.message;
             setSubmitStatus(`Error: ${msg}`);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleCancel = () => {
+        navigate('/designs');
     };
 
     const renderSingleSelect = (label, items, fieldKey, errorKey) => (
         <div>
-            <label className="block mb-1 font-medium">{label}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+                {label} <span className="text-red-500">*</span>
+            </label>
             <select
                 name={fieldKey}
                 value={design[fieldKey]}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                required
             >
                 <option value="">Select {label}</option>
                 {items.map(item => (
@@ -259,15 +272,15 @@ const DesignForm = () => {
                 ))}
             </select>
             {errors[errorKey] && (
-                <p className="text-red-500 text-sm">{errors[errorKey]}</p>
+                <p className="text-red-500 text-sm mt-1">{errors[errorKey]}</p>
             )}
         </div>
     );
 
     const renderMultiSelect = (label, items, fieldKey) => (
         <div>
-            <label className="block mb-1 font-medium">{label}</label>
-            <div className="flex flex-wrap gap-3">
+            <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+            <div className="flex flex-wrap gap-2">
                 {items.map(item => {
                     const selected = design[fieldKey].includes(item._id);
                     return (
@@ -275,16 +288,15 @@ const DesignForm = () => {
                             key={item._id}
                             type="button"
                             onClick={() => handleMultiToggle(fieldKey, item._id)}
-                            className={`px-3 py-1 border rounded ${selected ? 'bg-green-600 text-white' : 'bg-gray-100'}`}
+                            className={`px-3 py-2 border rounded-md text-sm font-medium transition-colors ${
+                                selected 
+                                    ? 'bg-gray-900 text-white border-gray-900' 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            }`}
                         >
                             {item.name} 
-                            {item.code &&
-                            <>
-                            - {item.code}
-                            </>
-                            }
-                             - £{item.price}
-
+                            {item.code && ` - ${item.code}`}
+                            {item.price && ` - £${item.price}`}
                         </button>
                     );
                 })}
@@ -294,21 +306,19 @@ const DesignForm = () => {
 
     const renderExtrasWithColors = () => (
         <div>
-            <div className="flex items-center justify-between mb-3">
-                <label className="block font-medium">Extras with Colors</label>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">Extras with Colors</label>
 
             <div className="space-y-4">
                 {design.extras.map((extraItem, index) => {
                     const selectedExtra = extrasList.find(extra => extra._id === extraItem.extra);
 
                     return (
-                        <div key={index} className="border rounded p-4 bg-gray-50">
+                        <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                             <div className="flex items-center gap-3 mb-3">
                                 <select
                                     value={extraItem.extra}
                                     onChange={(e) => handleExtraChange(index, e.target.value)}
-                                    className="flex-1 border rounded px-3 py-2"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                                 >
                                     <option value="">Select Extra</option>
                                     {extrasList.map(extra => (
@@ -320,7 +330,7 @@ const DesignForm = () => {
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveExtra(index)}
-                                    className="p-2 text-red-600 hover:bg-red-100 rounded"
+                                    className="p-2 text-red-600 hover:bg-red-100 rounded-md transition-colors"
                                 >
                                     <X size={16} />
                                 </button>
@@ -328,7 +338,7 @@ const DesignForm = () => {
 
                             {extraItem.extra && (
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Colors for {selectedExtra?.name}:
                                     </label>
                                     <div className="flex flex-wrap gap-2">
@@ -339,19 +349,20 @@ const DesignForm = () => {
                                                     key={color._id}
                                                     type="button"
                                                     onClick={() => handleColorToggle(index, color._id)}
-                                                    className={`px-3 py-1 border rounded text-sm flex items-center gap-1 ${isSelected
-                                                        ? 'bg-blue-600 text-white border-blue-600'
-                                                        : 'bg-white border-gray-300 hover:bg-gray-50'
-                                                        }`}
+                                                    className={`px-3 py-2 border rounded-md text-sm flex items-center gap-2 transition-colors ${
+                                                        isSelected
+                                                            ? 'bg-blue-600 text-white border-blue-600'
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    }`}
                                                 >
                                                     {color.name}
                                                     {color.code && (
                                                         <div
-                                                            className="w-3 h-3 rounded-full border border-gray-400"
+                                                            className="w-4 h-4 rounded-full border border-gray-400"
                                                             style={{ backgroundColor: color.code }}
                                                         />
                                                     )}
-                                                    {isSelected && <Check size={12} />}
+                                                    {isSelected && <Check size={14} />}
                                                 </button>
                                             );
                                         })}
@@ -368,21 +379,20 @@ const DesignForm = () => {
                 })}
 
                 {design.extras.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                        <p>No extras added yet. Click "Add Extra" to get started.</p>
+                    <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm">No extras added yet. Click "Add Extra" to get started.</p>
                     </div>
                 )}
             </div>
-            <div className='my-2'>
-                             <button
-                    type="button"
-                    onClick={handleAddExtra}
-                    className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                    <Plus size={16} />
-                    Add Extra
-                </button>
-            </div>
+            
+            <button
+                type="button"
+                onClick={handleAddExtra}
+                className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+            >
+                <Plus size={16} />
+                Add Extra
+            </button>
         </div>
     );
 
@@ -390,135 +400,238 @@ const DesignForm = () => {
     const selectedLensTypeName = lensList.find(lens => lens._id === design.lensType)?.name || '';
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 bg-white text-black shadow-md rounded-xl space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                <p className="text-blue-800 text-sm mb-2">
-                    <strong>Design Display Rules:</strong>
-                </p>
-                <ul className="text-blue-700 text-sm space-y-1">
-                    <li>• If you select a specific recommended lens, this design will only appear for that lens type + recommended lens combination</li>
-                    <li>• If you leave recommended lens empty, this design will appear under ALL recommended lenses for the selected lens type</li>
-                </ul>
+        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
+            <div className="border-b border-gray-100 pb-4 mb-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-xl font-medium text-gray-900">
+                            {id ? 'Edit Design' : 'Create New Design'}
+                        </h2>
+                        <p className="text-sm text-gray-500 mt-1">
+                            {id ? 'Modify the existing design details' : 'Fill in the details to create a new design'}
+                        </p>
+                    </div>
+                    <a
+                        href="/designs"
+                        className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Designs
+                    </a>
+                </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                    <p className="text-amber-800 text-sm font-semibold">Design Visibility</p>
+            {submitStatus && (
+                <div className={`px-4 py-3 mb-6 rounded-md border-l-4 ${
+                    submitStatus.startsWith('Error') 
+                        ? 'bg-red-50 border-red-400 text-red-700'
+                        : 'bg-green-50 border-green-400 text-green-700'
+                }`}>
+                    <p className="text-sm">{submitStatus}</p>
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Design Visibility Section */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-800">Design Visibility</h3>
+                            <p className="text-xs text-gray-600 mt-1">
+                                Control whether this design is visible to customers or used for internal configuration
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setDesign(prev => ({ ...prev, isVisible: !prev.isVisible }))}
+                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                design.isVisible
+                                    ? 'bg-gray-900 text-white hover:bg-gray-800'
+                                    : 'bg-gray-600 text-white hover:bg-gray-700'
+                            }`}
+                        >
+                            {design.isVisible ? (
+                                <>
+                                    <Eye className="w-4 h-4" />
+                                    Visible
+                                </>
+                            ) : (
+                                <>
+                                    <EyeOff className="w-4 h-4" />
+                                    Hidden
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    
+                    {!design.isVisible && (
+                        <div className="mt-3 p-3 bg-gray-100 border border-gray-300 rounded-md">
+                            <p className="text-sm text-gray-700">
+                                <strong>⚠️ Configuration Design Mode:</strong> This design will be hidden from customers and used only for internal configuration.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Design Rules Info */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-800 mb-2">Design Display Rules</h3>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                        <li>• If you select a specific recommended lens, this design will only appear for that lens type + recommended lens combination</li>
+                        <li>• If you leave recommended lens empty, this design will appear under ALL recommended lenses for the selected lens type</li>
+                    </ul>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Lens Type Selection */}
+                    <div>
+                        {renderSingleSelect('Lens Type', lensList, 'lensType', 'lensType')}
+                    </div>
+
+                    {/* Price */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Price <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                            <input
+                                type="number"
+                                name="price"
+                                value={design.price}
+                                onChange={handleChange}
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 99.99"
+                                className="w-full pl-7 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                                required
+                            />
+                        </div>
+                        {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+                    </div>
+
+                    {/* Name */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={design.name}
+                            onChange={handleChange}
+                            placeholder="Design name"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                            required
+                        />
+                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea
+                            name="description"
+                            value={design.description}
+                            onChange={handleChange}
+                            placeholder="Brief description of the design"
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors resize-none"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Optional: Provide additional details about this design</p>
+                    </div>
+                </div>
+
+                {/* Recommended Lens Selection */}
+                {design.lensType && (
+                    <div>
+                        {renderMultiSelect(
+                            'Recommended Lens (Optional)',
+                            filteredRecommendedList,
+                            'recommendedLens',
+                        )}
+                        {design.recommendedLens.length === 0 && (
+                            <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-gray-800">
+                                            Design will apply to entire lens type
+                                        </h3>
+                                        <div className="mt-1 text-sm text-gray-600">
+                                            Since no specific recommended lens is selected, this design will appear under every recommended lens option for the
+                                            <strong> {selectedLensTypeName} lens type.</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Coatings Selection */}
+                <div>
+                    {renderMultiSelect('Coatings', coatingList, 'coatings')}
+                </div>
+
+                {/* Extras with Colors */}
+                <div>
+                    {renderExtrasWithColors()}
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                    
+                    {/* Show preview of current image */}
+                    {design.image && (
+                        <div className="mb-4 bg-gray-50 rounded-lg p-4">
+                            <div className="relative inline-block">
+                                <img
+                                    src={design.image}
+                                    alt="Preview"
+                                    className="max-w-full h-auto max-h-64 rounded-md shadow-sm border border-gray-200"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <ImageUploader onUpload={handleImageUpload} initialImage={design.image} />
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
                     <button
                         type="button"
-                        onClick={() =>
-                            setDesign(prev => ({ ...prev, isVisible: !prev.isVisible }))
-                        }
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500 text-white text-sm rounded hover:bg-amber-600"
-                        title="Toggle visibility"
+                        onClick={handleCancel}
+                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
                     >
-                        {design.isVisible ? (
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="inline-flex items-center gap-2 px-6 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        {loading ? (
                             <>
-                                <Eye className="w-4 h-4" />
-                                Visible
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Saving...
                             </>
                         ) : (
                             <>
-                                <EyeOff className="w-4 h-4" />
-                                Hidden
+                                <Check className="w-4 h-4" />
+                                {id ? 'Update Design' : 'Create Design'}
                             </>
                         )}
                     </button>
                 </div>
-                <ul className="text-amber-700 text-sm space-y-1 pl-4 list-disc">
-                    <li>
-                        <strong>Configuration Designs:</strong> Set visibility to false to hide from customers
-                    </li>
-                    <li>
-                        <strong>Purpose:</strong> Hidden designs define available extras for the selected lens type
-                    </li>
-                </ul>
-            </div>
-            <div>
-
-                {!design.isVisible && (
-                    <div className="mt-2 p-2 bg-orange-100 border border-orange-300 rounded">
-                        <p className="text-orange-800 text-sm">
-                            <strong>⚠️ Configuration Design Mode:</strong> This design will be hidden from customers. It will only be used to provide extras as options. The name and other fields would not be visible to user.
-                        </p>
-                    </div>
-                )}
-            </div>
-
-            {renderSingleSelect('Lens Type', lensList, 'lensType', 'lensType')}
-
-            {design.lensType && (
-                <div>
-                    {renderMultiSelect(
-                        'Recommended Lens (Optional)',
-                        filteredRecommendedList,
-                        'recommendedLens',
-                    )}
-                    {!design.recommendedLens && (
-                        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                            <div className="flex items-start">
-                                <div className="flex-shrink-0">
-                                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-yellow-800">
-                                        Design will apply to entire lens type
-                                    </h3>
-                                    <div className="mt-1 text-sm text-yellow-700">
-                                        Since no specific recommended lens is selected, this design will appear under every recommended lens option for the
-                                        <strong>
-                                            {' '}{selectedLensTypeName} lens type.
-                                        </strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <div>
-                <label className="block mb-1 font-medium">Name</label>
-                <div className="flex gap-2">
-                    <input type="text" name="name" value={design.name} onChange={handleChange}
-                        className="flex-1 border rounded px-3 py-2" />
-                </div>
-                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-
-            </div>
-
-
-            <div>
-                <label className="block mb-2 font-semibold">Image</label>
-                {design.image && (
-                    <div className="my-4">
-                        <img src={design.image} alt="Preview" className="max-h-96 rounded border" />
-                    </div>
-                )}
-                <ImageUploader onUpload={handleImageUpload} initialImage={design.image} />
-            </div>
-
-            <div>
-                <label className="block mb-1 font-medium">Description</label>
-                <textarea name="description" value={design.description} onChange={handleChange}
-                    className="w-full border rounded px-3 py-2" rows={3} />
-            </div>
-
-            <div>
-                <label className="block mb-1 font-medium">Price</label>
-                <input type="number" name="price" value={design.price} onChange={handleChange}
-                    className="w-full border rounded px-3 py-2" />
-                {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
-            </div>
-
-            {renderMultiSelect('Coatings', coatingList, 'coatings')}
-            {renderExtrasWithColors()}
-
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Save Design</button>
-            {submitStatus && <div className="text-center text-sm mt-2">{submitStatus}</div>}
-        </form>
+            </form>
+        </div>
     );
 };
 

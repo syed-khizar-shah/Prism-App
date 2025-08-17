@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet, useLocation } from 'react-router-dom';
 import ColorPage from './pages/Colors/ColorPage';
 import CoatingPage from './pages/Coatings/CoatingPage';
 import Dashboard from './pages/Dashboard';
@@ -17,11 +17,17 @@ import Guide from './pages/Guide';
 // import LensConfigurator from './LensConfigurator/components/LensConfigurator';
 import LensConfigurator from './Configurator/LensConfigurator';
 import LensConfig from './TestConfig/LensConfig';
+import FrameSummaryManager from './pages/FrameSummary/FrameSummaryManager';
+import PromoManagement from './pages/Promos/PromoManagement';
+import Navbar from './components/Navbar';
 
 
 const Layout = () => {
+  const location = useLocation();
+  
   return (
     <>
+      <Navbar currentPath={location.pathname} />
       <Outlet />
     </>
   );
@@ -35,6 +41,18 @@ const router = createBrowserRouter([
         path: '/',
         element: (
           <Dashboard />
+        ),
+      },
+      {
+        path: '/promo-manager',
+        element: (
+          <PromoManagement />
+        ),
+      },
+      {
+        path: '/frame-summary-manager',
+        element: (
+          <FrameSummaryManager />
         ),
       },
       {

@@ -12,19 +12,22 @@ export const ProgressBar = ({ currentStep, totalSteps }) => (
 // Selection Card Component
 export const SelectionCard = ({ item, isSelected, onSelect, priceLabel = "£" }) => (
   <button
-    className={`p-4 rounded-lg border-2 text-left transition-all ${
+    className={`rounded-lg border-2 transition-all h-36 ${
       isSelected
         ? 'border-blue-500 bg-blue-50 shadow-md'
         : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
     }`}
     onClick={() => onSelect(item)}
   >
-    <div className="font-medium text-lg">{item.name}</div>
-    {item.description && (
-      <div className="text-sm text-gray-600 mt-1">{item.description}</div>
-    )}
-    {item.price > 0 && (
-      <div className="text-green-600 text-sm mt-1">+{priceLabel}{item.price}</div>
+    {item.image ? (
+      <div className="relative">
+        <img src={item.image} alt={item.name} className="w-full object-cover" />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center">
+          <div className="font-medium text-lg text-white">{item.name}</div>
+        </div>
+      </div>
+    ) : (
+      <div className="font-medium text-lg">{item.name}</div>
     )}
   </button>
 );

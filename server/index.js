@@ -16,6 +16,8 @@ const uploadRoutes = require('./routes/upload')
 const recommendedLensRoutes = require('./routes/recommendedLensRoutes');
 const lensRoutes = require('./routes/lensRoutes')
 const designRoutes = require('./routes/designRoutes')
+const frameSummaryRoutes = require('./routes/frameSummaryRoutes')
+const promosRoutes = require('./routes/promoRoutes')
 
 
 
@@ -51,6 +53,10 @@ app.use('/api/recommended-lenses', recommendedLensRoutes);
 app.use('/api/lenses',lensRoutes)
 
 app.use('/api/designs',designRoutes)
+
+app.use('/api/frame-summary',frameSummaryRoutes)
+app.use('/api/promos',promosRoutes)
+
 
 
 
