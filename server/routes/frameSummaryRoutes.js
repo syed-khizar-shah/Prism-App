@@ -3,20 +3,16 @@ const frameSummaryController = require('../controllers/frameSummaryController.js
 
 const router = express.Router();
 
-// Main Frame Summary routes (singleton)
-router.get('/', frameSummaryController.getFrameSummary); // Get the singleton
-router.get('/all', frameSummaryController.getFrameSummaries); // Get all (for backward compatibility)
-router.post('/', frameSummaryController.createFrameSummary); // Create/Update the singleton
-router.put('/', frameSummaryController.updateFrameSummary); // Update the singleton
-router.delete('/', frameSummaryController.deleteFrameSummary); // Delete the singleton
-
-// Legacy routes with ID (for backward compatibility)
+// CRUD for whole Frame Summary
+router.post('/', frameSummaryController.createFrameSummary);
+router.get('/', frameSummaryController.getFrameSummaries);
 router.get('/:id', frameSummaryController.getFrameSummaryById);
+router.put('/:id', frameSummaryController.updateFrameSummary);
+router.delete('/:id', frameSummaryController.deleteFrameSummary);
 
-// Field-specific routes (work with singleton)
-router.post('/fields', frameSummaryController.addField);
-router.put('/fields/:fieldIndex', frameSummaryController.updateField);
-router.delete('/fields/:fieldIndex', frameSummaryController.removeField);
-router.put('/fields/reorder', frameSummaryController.reorderFields);
+// Field-specific routes
+router.post('/:id/fields', frameSummaryController.addField);
+router.put('/:id/fields/:fieldIndex', frameSummaryController.updateField);
+router.delete('/:id/fields/:fieldIndex', frameSummaryController.removeField);
 
 module.exports = router;

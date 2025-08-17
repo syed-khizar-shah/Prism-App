@@ -2,169 +2,79 @@
 const API_BASE_URL = `${import.meta.env.VITE_APP_BASE_URL}/api/frame-summary`; 
 
 class FrameSummaryAPI {
-  // Get the frame summary singleton
+  // Get or create the single frame summary
   static async getFrameSummary() {
     try {
       const response = await fetch(API_BASE_URL);
-      if (!response.ok) throw new Error('Failed to fetch frame summary');
-      return await response.json();
+      if (!response.ok) throw new Error('Failed to fetch frame summaries');
+      const summaries = await response.json();
+      
+      if (summaries.length > 0) {
+        return summaries[0]; // Return the first (and only) summary
+      } else {
+        // Create a new one if none exists
+        return await this.createFrameSummary({});
+      }
     } catch (error) {
       throw new Error('Failed to get frame summary');
     }
   }
 
-  // Get all frame summaries (for backward compatibility)
-  static async getAllFrameSummaries() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/all`);
-      if (!response.ok) throw new Error('Failed to fetch frame summaries');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to get frame summaries');
-    }
+  static async createFrameSummary(data) {
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create frame summary');
+    return response.json();
   }
 
-  // Create or update the frame summary singleton
-  static async createOrUpdateFrameSummary(data) {
-    try {
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to create/update frame summary');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to create/update frame summary');
-    }
+  static async updateFrameSummary(id, data) {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update frame summary');
+    return response.json();
   }
 
-  // Update the frame summary singleton
-  static async updateFrameSummary(data) {
-    try {
-      const response = await fetch(API_BASE_URL, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to update frame summary');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to update frame summary');
-    }
+  // Field-specific operations
+  static async addField(summaryId, fieldData) {
+    const response = await fetch(`${API_BASE_URL}/${summaryId}/fields`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fieldData),
+    });
+    if (!response.ok) throw new Error('Failed to add field');
+    return response.json();
   }
 
-  // Delete the frame summary (resets to default)
-  static async deleteFrameSummary() {
-    try {
-      const response = await fetch(API_BASE_URL, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Failed to delete frame summary');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to delete frame summary');
-    }
+  static async updateField(summaryId, fieldIndex, fieldData) {
+    const response = await fetch(`${API_BASE_URL}/${summaryId}/fields/${fieldIndex}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fieldData),
+    });
+    if (!response.ok) throw new Error('Failed to update field');
+    return response.json();
   }
 
-  // Field-specific operations (no ID needed - works with singleton)
-  static async addField(fieldData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/fields`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(fieldData),
-      });
-      if (!response.ok) throw new Error('Failed to add field');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to add field');
-    }
-  }
-
-  static async updateField(fieldIndex, fieldData) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/fields/${fieldIndex}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(fieldData),
-      });
-      if (!response.ok) throw new Error('Failed to update field');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to update field');
-    }
-  }
-
-  static async removeField(fieldIndex) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/fields/${fieldIndex}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Failed to remove field');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to remove field');
-    }
-  }
-
-  // Reorder fields
-  static async reorderFields(fieldOrders) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/fields/reorder`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fieldOrders }),
-      });
-      if (!response.ok) throw new Error('Failed to reorder fields');
-      return await response.json();
-    } catch (error) {
-      throw new Error('Failed to reorder fields');
-    }
-  }
-
-  // Helper methods
-  static async getActiveFields() {
-    try {
-      const summary = await this.getFrameSummary();
-      return summary.fields.filter(field => field.isActive).sort((a, b) => a.order - b.order);
-    } catch (error) {
-      throw new Error('Failed to get active fields');
-    }
-  }
-
-  static async getRequiredFields() {
-    try {
-      const summary = await this.getFrameSummary();
-      return summary.fields.filter(field => field.required && field.isActive).sort((a, b) => a.order - b.order);
-    } catch (error) {
-      throw new Error('Failed to get required fields');
-    }
-  }
-
-  static async getFieldsByType(type) {
-    try {
-      const summary = await this.getFrameSummary();
-      return summary.fields.filter(field => field.type === type && field.isActive).sort((a, b) => a.order - b.order);
-    } catch (error) {
-      throw new Error('Failed to get fields by type');
-    }
+  static async removeField(summaryId, fieldIndex) {
+    const response = await fetch(`${API_BASE_URL}/${summaryId}/fields/${fieldIndex}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to remove field');
+    return response.json();
   }
 }
 
