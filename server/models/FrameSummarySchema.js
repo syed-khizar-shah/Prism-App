@@ -47,4 +47,4 @@ const frameSummarySchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-module.exports = mongoose.model('FrameSummarySettings', frameSummarySchema);
+module.exports = mongoose.model('FrameSummary', frameSummarySchema);
