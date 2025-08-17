@@ -10,9 +10,11 @@ class FrameSummaryAPI {
       const summaries = await response.json();
       
       if (summaries.length > 0) {
+        console.log("yes summary")
         return summaries[0]; // Return the first (and only) summary
       } else {
         // Create a new one if none exists
+        console.log("no summary")
         return await this.createFrameSummary({});
       }
     } catch (error) {

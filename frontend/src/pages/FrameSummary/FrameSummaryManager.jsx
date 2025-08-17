@@ -18,10 +18,9 @@ const FrameSummaryManager = () => {
 
   // Check for unsaved changes whenever fields change
   useEffect(() => {
-    if (originalFields.length > 0) {
-      const hasChanges = JSON.stringify(fields) !== JSON.stringify(originalFields);
-      setHasUnsavedChanges(hasChanges);
-    }
+    // Always check for changes, regardless of originalFields length
+    const hasChanges = JSON.stringify(fields) !== JSON.stringify(originalFields);
+    setHasUnsavedChanges(hasChanges);
   }, [fields, originalFields]);
 
   // Warn user before leaving with unsaved changes
@@ -56,6 +55,8 @@ const FrameSummaryManager = () => {
     try {
       setLoading(true);
       const data = await FrameSummaryAPI.getFrameSummary();
+      console.log({data})
+      
       setSummary(data);
       setFields([...data.fields]);
       setOriginalFields([...data.fields]); // Store original state

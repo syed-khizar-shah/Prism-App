@@ -64,7 +64,7 @@ app.use('/api/promos',promosRoutes)
 
 
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Masjid App API V2" });
+  res.json({ message: "Welcome to Prism App Admin API" });
 });
 
 app.use((req, res) => {
