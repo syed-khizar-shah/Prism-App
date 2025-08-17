@@ -1,24 +1,32 @@
 const FrameSummary = require("../models/FrameSummarySchema");
 
+const FRAME_SUMMARY_SINGLETON_ID = 'framesummary';
+
 /**
- * Create a new Frame Summary
+ * Get the Frame Summary singleton
  */
-exports.createFrameSummary = async (req, res) => {
+exports.getFrameSummary = async (req, res) => {
   try {
-    const frameSummary = new FrameSummary(req.body);
-    await frameSummary.save();
-    res.status(201).json(frameSummary);
+    let summary = await FrameSummary.findById(FRAME_SUMMARY_SINGLETON_ID);
+    
+    // If no summary exists, create the default one
+    if (!summary) {
+      summary = new FrameSummary();
+      await summary.save();
+    }
+    
+    res.json(summary);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 /**
- * Get all Frame Summaries
+ * Get all Frame Summaries (for backward compatibility, but should only return one)
  */
 exports.getFrameSummaries = async (req, res) => {
   try {
-    const summaries = await FrameSummary.find().sort({ sectionOrder: 1 });
+    const summaries = await FrameSummary.find().sort({ createdAt: 1 });
     res.json(summaries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -41,12 +49,34 @@ exports.getFrameSummaryById = async (req, res) => {
 };
 
 /**
- * Update a Frame Summary (full update)
+ * Create/Update the Frame Summary singleton
+ */
+exports.createFrameSummary = async (req, res) => {
+  try {
+    // Since this is a singleton, we'll upsert instead of creating new
+    const summary = await FrameSummary.findByIdAndUpdate(
+      FRAME_SUMMARY_SINGLETON_ID,
+      req.body,
+      { 
+        new: true, 
+        runValidators: true, 
+        upsert: true,
+        setDefaultsOnInsert: true
+      }
+    );
+    res.status(201).json(summary);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Update the Frame Summary singleton
  */
 exports.updateFrameSummary = async (req, res) => {
   try {
     const summary = await FrameSummary.findByIdAndUpdate(
-      req.params.id,
+      FRAME_SUMMARY_SINGLETON_ID,
       req.body,
       { new: true, runValidators: true }
     );
@@ -60,11 +90,11 @@ exports.updateFrameSummary = async (req, res) => {
 };
 
 /**
- * Delete a Frame Summary
+ * Delete the Frame Summary (resets to default)
  */
 exports.deleteFrameSummary = async (req, res) => {
   try {
-    const summary = await FrameSummary.findByIdAndDelete(req.params.id);
+    const summary = await FrameSummary.findByIdAndDelete(FRAME_SUMMARY_SINGLETON_ID);
     if (!summary) {
       return res.status(404).json({ error: 'FrameSummary not found' });
     }
@@ -75,15 +105,24 @@ exports.deleteFrameSummary = async (req, res) => {
 };
 
 /**
- * Add a new field to an existing Frame Summary
+ * Add a new field to the Frame Summary
  */
 exports.addField = async (req, res) => {
   try {
-    const summary = await FrameSummary.findById(req.params.id);
+    let summary = await FrameSummary.findById(FRAME_SUMMARY_SINGLETON_ID);
+    
+    // If no summary exists, create the default one
     if (!summary) {
-      return res.status(404).json({ error: 'FrameSummary not found' });
+      summary = new FrameSummary();
     }
-    summary.fields.push(req.body); // expects { name, type, required, isActive, order, options }
+    
+    // Add the new field with proper order
+    const newField = {
+      ...req.body,
+      order: summary.fields.length + 1
+    };
+    
+    summary.fields.push(newField);
     await summary.save();
     res.json(summary);
   } catch (error) {
@@ -96,17 +135,24 @@ exports.addField = async (req, res) => {
  */
 exports.updateField = async (req, res) => {
   try {
-    const summary = await FrameSummary.findById(req.params.id);
+    const summary = await FrameSummary.findById(FRAME_SUMMARY_SINGLETON_ID);
     if (!summary) {
       return res.status(404).json({ error: 'FrameSummary not found' });
     }
 
-    const field = summary.fields.id(req.params.fieldIndex);
-    if (!field) {
-      return res.status(404).json({ error: 'Field not found' });
+    const fieldIndex = parseInt(req.params.fieldIndex);
+    if (fieldIndex < 0 || fieldIndex >= summary.fields.length) {
+      return res.status(404).json({ error: 'Field index out of range' });
     }
 
-    Object.assign(field, req.body); // update only provided properties
+    const field = summary.fields[fieldIndex];
+    Object.assign(field, req.body);
+    
+    // Ensure order is maintained
+    if (req.body.order !== undefined) {
+      field.order = req.body.order;
+    }
+    
     await summary.save();
     res.json(summary);
   } catch (error) {
@@ -119,11 +165,56 @@ exports.updateField = async (req, res) => {
  */
 exports.removeField = async (req, res) => {
   try {
-    const summary = await FrameSummary.findById(req.params.id);
+    const summary = await FrameSummary.findById(FRAME_SUMMARY_SINGLETON_ID);
     if (!summary) {
       return res.status(404).json({ error: 'FrameSummary not found' });
     }
-    summary.fields.splice(req.params.fieldIndex, 1); // remove by index
+    
+    const fieldIndex = parseInt(req.params.fieldIndex);
+    if (fieldIndex < 0 || fieldIndex >= summary.fields.length) {
+      return res.status(404).json({ error: 'Field index out of range' });
+    }
+    
+    summary.fields.splice(fieldIndex, 1);
+    
+    // Reorder remaining fields
+    summary.fields.forEach((field, index) => {
+      field.order = index + 1;
+    });
+    
+    await summary.save();
+    res.json(summary);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Reorder fields in the Frame Summary
+ */
+exports.reorderFields = async (req, res) => {
+  try {
+    const summary = await FrameSummary.findById(FRAME_SUMMARY_SINGLETON_ID);
+    if (!summary) {
+      return res.status(404).json({ error: 'FrameSummary not found' });
+    }
+
+    const { fieldOrders } = req.body; // Array of { fieldId, newOrder }
+    
+    if (!Array.isArray(fieldOrders)) {
+      return res.status(400).json({ error: 'fieldOrders must be an array' });
+    }
+
+    // Update field orders
+    fieldOrders.forEach(({ fieldIndex, newOrder }) => {
+      if (fieldIndex >= 0 && fieldIndex < summary.fields.length) {
+        summary.fields[fieldIndex].order = newOrder;
+      }
+    });
+
+    // Sort fields by order
+    summary.fields.sort((a, b) => a.order - b.order);
+    
     await summary.save();
     res.json(summary);
   } catch (error) {

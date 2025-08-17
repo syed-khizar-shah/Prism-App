@@ -29,8 +29,15 @@ const frameFieldSchema = new mongoose.Schema({
     }
 }, { _id: false });
 
+// There should only ever be one FrameSummary document.
+// Prevent creation of multiple FrameSummary documents by using a fixed _id.
+const FRAME_SUMMARY_SINGLETON_ID = 'framesummary';
 
 const frameSummarySchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: FRAME_SUMMARY_SINGLETON_ID
+    },
     fields: {
         type: [frameFieldSchema],
         default: [
@@ -40,4 +47,4 @@ const frameSummarySchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-module.exports =  mongoose.model('FrameSummary', frameSummarySchema);
+module.exports = mongoose.model('FrameSummarySettings', frameSummarySchema);
