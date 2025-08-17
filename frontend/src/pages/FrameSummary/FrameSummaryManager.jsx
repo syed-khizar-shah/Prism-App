@@ -16,7 +16,6 @@ const FrameSummaryManager = () => {
     fetchSummary();
   }, []);
 
-  // Check for unsaved changes whenever fields change
   useEffect(() => {
     // Always check for changes, regardless of originalFields length
     const hasChanges = JSON.stringify(fields) !== JSON.stringify(originalFields);
