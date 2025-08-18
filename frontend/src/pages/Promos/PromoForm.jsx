@@ -11,6 +11,7 @@ const PromoForm = ({ promo, onSubmit, onCancel, isEdit = false }) => {
     endDate: '',
     usageLimit: '',
     isActive: true,
+    requiredFrames: '',
     ...promo
   });
 
@@ -42,7 +43,8 @@ const PromoForm = ({ promo, onSubmit, onCancel, isEdit = false }) => {
         ...formData,
         code: formData.code.trim().toUpperCase(),
         discountValue: Number(formData.discountValue),
-        usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null
+        usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null,
+        requiredFrames: Number(formData.requiredFrames)
       };
 
       await onSubmit(submitData);
@@ -71,7 +73,7 @@ const PromoForm = ({ promo, onSubmit, onCancel, isEdit = false }) => {
           {isEdit ? 'Modify the existing promo code details' : 'Fill in the details to create a new promotional offer'}
         </p>
       </div>
-      
+
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 mb-6">
           <p className="text-sm">{error}</p>
@@ -190,6 +192,28 @@ const PromoForm = ({ promo, onSubmit, onCancel, isEdit = false }) => {
           <p className="text-xs text-gray-500 mt-1">Optional: Set maximum number of uses</p>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Required Frames <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            name="requiredFrames"
+            value={formData.requiredFrames || ''}
+            onChange={handleChange}
+            min="1"
+            placeholder="e.g., 2"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm 
+               focus:outline-none focus:ring-1 focus:ring-gray-400 
+               focus:border-gray-400 transition-colors"
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Promo will be available only when buying this number of frames
+          </p>
+        </div>
+
+
         <div className="flex items-center pt-4">
           <input
             type="checkbox"
@@ -220,7 +244,7 @@ const PromoForm = ({ promo, onSubmit, onCancel, isEdit = false }) => {
             )}
             {isEdit ? 'Update' : 'Create'} Promo
           </button>
-          
+
           <button
             onClick={onCancel}
             className="border border-gray-300 text-gray-700 px-6 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 flex items-center gap-2 transition-colors"

@@ -8,7 +8,7 @@ const frameFieldSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['text', 'number', 'select'],
+        enum: ['text', 'number', 'select','boolean','date'],
         default: 'text'
     },
     required: {

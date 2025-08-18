@@ -41,9 +41,9 @@ const promoSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  requiredFrames: {
+    type: Number,   // e.g. 2 → promo applies only if buying exactly 2 frames
+    required: true
   }
 }, { timestamps: true }); // createdAt, updatedAt automatically handled
 
