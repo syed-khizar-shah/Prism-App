@@ -2,6 +2,10 @@
 const mongoose = require('mongoose');
 
 const frameFieldSchema = new mongoose.Schema({
+    key: {
+        type: String,
+        required: true,
+    },
     name: {
         type: String,
         required: true // e.g. "Frame Model", "Frame Price"

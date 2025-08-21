@@ -1,6 +1,6 @@
 // components/FrameSummaryManager.js
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Plus, Trash2, ArrowUp, ArrowDown, X, ArrowLeft } from 'lucide-react';
+import { Settings, Save, Plus, Trash2, ArrowUp, ArrowDown, X, ArrowLeft, Copy, Check } from 'lucide-react';
 import FrameSummaryAPI from './FrameSummaryAPI';
 
 const FrameSummaryManager = () => {
@@ -11,6 +11,44 @@ const FrameSummaryManager = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  // Function to generate a unique field key
+  const generateFieldKey = (name = '', existingKeys = []) => {
+    // Base key from field name or fallback
+    let baseKey = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_') // Replace non-alphanumeric with underscore
+      .replace(/_{2,}/g, '_') // Replace multiple underscores with single
+      .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
+
+    // Fallback if name is empty or results in empty key
+    if (!baseKey) {
+      baseKey = 'field';
+    }
+
+    // Ensure uniqueness
+    let uniqueKey = baseKey;
+    let counter = 1;
+
+    while (existingKeys.includes(uniqueKey)) {
+      uniqueKey = `${baseKey}_${counter}`;
+      counter++;
+    }
+
+    return uniqueKey;
+  };
+
+  // Function to copy key to clipboard
+  const copyKeyToClipboard = async (key) => {
+    try {
+      await navigator.clipboard.writeText(key);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy key:', err);
+    }
+  };
 
   useEffect(() => {
     fetchSummary();
@@ -54,8 +92,8 @@ const FrameSummaryManager = () => {
     try {
       setLoading(true);
       const data = await FrameSummaryAPI.getFrameSummary();
-      console.log({data})
-      
+      console.log({ data })
+
       setSummary(data);
       setFields([...data.fields]);
       setOriginalFields([...data.fields]); // Store original state
@@ -68,7 +106,9 @@ const FrameSummaryManager = () => {
   };
 
   const handleAddField = () => {
+    const existingKeys = fields.map(f => f.key);
     const newField = {
+      key: generateFieldKey('', existingKeys), // Generate unique key
       name: '',
       type: 'text',
       required: false,
@@ -77,15 +117,15 @@ const FrameSummaryManager = () => {
       options: []
     };
     setFields([...fields, newField]);
-    
+
     // Scroll to the new field after it's added
     setTimeout(() => {
       const newFieldIndex = fields.length;
       const fieldElement = document.querySelector(`[data-field-index="${newFieldIndex}"]`);
       if (fieldElement) {
-        fieldElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
+        fieldElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
         });
         // Focus on the field name input for immediate editing
         const nameInput = fieldElement.querySelector('input[name="field-name"]');
@@ -98,8 +138,26 @@ const FrameSummaryManager = () => {
 
   const handleUpdateField = (index, updates) => {
     const updatedFields = [...fields];
-    updatedFields[index] = { ...updatedFields[index], ...updates };
+    const currentField = updatedFields[index];
+
+    updatedFields[index] = { ...currentField, ...updates };
     setFields(updatedFields);
+  };
+
+  const handleFieldNameBlur = (index, name) => {
+    const updatedFields = [...fields];
+    const currentField = updatedFields[index];
+
+    // Only generate key if field doesn't have a proper key yet (is generic or empty) and name is not empty
+    const isGenericKey = !currentField.key || currentField.key.startsWith('field');
+    if (isGenericKey && name.trim()) {
+      const existingKeys = updatedFields.map((f, i) => i !== index ? f.key : null).filter(Boolean);
+      updatedFields[index] = {
+        ...currentField,
+        key: generateFieldKey(name.trim(), existingKeys)
+      };
+      setFields(updatedFields);
+    }
   };
 
   const handleRemoveField = (index) => {
@@ -111,14 +169,14 @@ const FrameSummaryManager = () => {
   const handleMoveField = (index, direction) => {
     const newFields = [...fields];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
+
     if (targetIndex >= 0 && targetIndex < newFields.length) {
       [newFields[index], newFields[targetIndex]] = [newFields[targetIndex], newFields[index]];
-      
+
       // Update order values
       newFields[index].order = index + 1;
       newFields[targetIndex].order = targetIndex + 1;
-      
+
       setFields(newFields);
     }
   };
@@ -143,7 +201,7 @@ const FrameSummaryManager = () => {
 
   const handleSave = async () => {
     setError(null);
-    
+
     // Validate fields
     const invalidFields = fields.filter(field => !field.name.trim());
     if (invalidFields.length > 0) {
@@ -253,11 +311,10 @@ const FrameSummaryManager = () => {
               <button
                 onClick={handleSave}
                 disabled={saving || !hasUnsavedChanges}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
-                  hasUnsavedChanges 
-                    ? 'bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-900' 
-                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                } ${saving ? 'opacity-50' : ''}`}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${hasUnsavedChanges
+                  ? 'bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-900'
+                  : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  } ${saving ? 'opacity-50' : ''}`}
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Saving...' : hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
@@ -373,14 +430,17 @@ const FrameSummaryManager = () => {
                               >
                                 <ArrowDown className="w-4 h-4" />
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveField(index)}
-                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                                title="Remove field"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              {
+                                field.key === "frame_price" ||
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveField(index)}
+                                  className={`p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors`}
+                                  title="Remove field"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              }
                             </div>
                           </div>
                         </div>
@@ -398,9 +458,41 @@ const FrameSummaryManager = () => {
                                 name="field-name"
                                 value={field.name}
                                 onChange={(e) => handleUpdateField(index, { name: e.target.value })}
+                                onBlur={(e) => handleFieldNameBlur(index, e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                                 placeholder="Enter field name"
                               />
+                            </div>
+
+                            {/* Field Key */}
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Field Key
+                                <span className="text-xs text-gray-500 ml-1">(Auto-generated, read-only)</span>
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={field.key || ''}
+                                  readOnly
+                                  className="w-full px-3 py-2 pr-10 border border-gray-300 bg-gray-50 rounded-md text-sm text-gray-600 cursor-not-allowed"
+                                  placeholder="Key will be generated from field name"
+                                />
+                                {field.key && (
+                                  <button
+                                    type="button"
+                                    onClick={() => copyKeyToClipboard(field.key)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                    title="Copy key to clipboard"
+                                  >
+                                    {copiedKey === field.key ? (
+                                      <Check className="w-4 h-4 text-green-600" />
+                                    ) : (
+                                      <Copy className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
                             </div>
 
                             {/* Field Type */}
@@ -420,7 +512,7 @@ const FrameSummaryManager = () => {
                             </div>
 
                             {/* Field Options */}
-                            <div className="md:col-span-2">
+                            <div>
                               <div className="flex items-center space-x-6">
                                 <label className="flex items-center">
                                   <input
