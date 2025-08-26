@@ -18,6 +18,7 @@ const lensRoutes = require('./routes/lensRoutes')
 const designRoutes = require('./routes/designRoutes')
 const frameSummaryRoutes = require('./routes/frameSummaryRoutes')
 const promosRoutes = require('./routes/promoRoutes')
+const orderRoutes = require('./routes/orderRoutes')
 
 
 
@@ -26,11 +27,11 @@ const promosRoutes = require('./routes/promoRoutes')
 const app = express()
 
 app.use(
-    cors({
-        origin: '*',
-        methods: ['POST', 'GET', 'PUT', 'DELETE'],
-        credentials: true,
-    })
+	cors({
+		origin: '*',
+		methods: ['POST', 'GET', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+		credentials: true,
+	})
 )
 app.use(bodyParser.json())
 
@@ -56,7 +57,7 @@ app.use('/api/designs',designRoutes)
 
 app.use('/api/frame-summary',frameSummaryRoutes)
 app.use('/api/promos',promosRoutes)
-
+app.use('/api/orders', orderRoutes)
 
 
 

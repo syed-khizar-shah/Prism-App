@@ -10,6 +10,7 @@ export default function Navbar({ currentPath = "/" }) {
   
   const navigationItems = [
     { path: "/", label: "Dashboard" },
+    { path: "/orders", label: "Orders" },
     { path: "/lenses", label: "Lenses" },
     { path: "/colors", label: "Colors" },
     { path: "/coatings", label: "Coatings" },

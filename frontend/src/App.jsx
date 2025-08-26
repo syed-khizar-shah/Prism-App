@@ -20,6 +20,7 @@ import LensConfig from './TestConfig/LensConfig';
 import FrameSummaryManager from './pages/FrameSummary/FrameSummaryManager';
 import PromoManagement from './pages/Promos/PromoManagement';
 import Navbar from './components/Navbar';
+import { OrdersList, OrderDetail } from './pages/Orders';
 
 
 const Layout = () => {
@@ -161,6 +162,18 @@ const router = createBrowserRouter([
         path: '/age-groups',
         element: (
           <AgeGroupPage />
+        )
+      },
+      {
+        path: '/orders',
+        element: (
+          <OrdersList />
+        )
+      },
+      {
+        path: '/orders/:id',
+        element: (
+          <OrderDetail />
         )
       },
     ],
