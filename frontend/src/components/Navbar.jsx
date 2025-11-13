@@ -7,7 +7,7 @@ const Link = ({ to, children, className, ...props }) => (
 
 export default function Navbar({ currentPath = "/" }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const navigationItems = [
     { path: "/", label: "Dashboard" },
     { path: "/orders", label: "Orders" },
@@ -30,26 +30,14 @@ export default function Navbar({ currentPath = "/" }) {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between py-4">
-          <h1 className="text-xl font-semibold text-gray-900">Optix Admin</h1>
-          
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
-          >
-            <span className="sr-only">Menu</span>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+    <nav className="w-full bg-white border-b border-gray-200">
+      <div className="flex flex-col w-full">
+        {/* Navbar Header and Menu Button */}
+
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:block border-t border-gray-200">
-          <div className="flex space-x-8 py-4">
+        <div className="hidden lg:block  border-gray-200 w-full">
+          <div className="flex flex-row w-full px-4 space-x-11 py-4">
             {navigationItems.map((item) => (
               <Link
                 key={item.path}
@@ -68,7 +56,7 @@ export default function Navbar({ currentPath = "/" }) {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 py-4">
+          <div className="lg:hidden border-t border-gray-200 py-4 w-full px-4">
             <div className="space-y-2">
               {navigationItems.map((item) => (
                 <Link
