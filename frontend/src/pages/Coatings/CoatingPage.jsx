@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import CoatingForm from './coatingForm';
 import { Edit, Trash2, Shield, ArrowLeft } from 'lucide-react';
+import axiosInstance from '../../../api/axios';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const CoatingPage = () => {
   const [coatings, setCoatings] = useState([]);
@@ -14,7 +13,7 @@ const CoatingPage = () => {
   const fetchCoatings = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${baseUrl}/api/coatings`);
+      const res = await axiosInstance.get(`/api/coatings`);
       setCoatings(res.data);
     } catch (err) {
       console.error('Failed to fetch coatings', err);
@@ -30,7 +29,7 @@ const CoatingPage = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this coating?')) return;
     try {
-      await axios.delete(`${baseUrl}/api/coatings/${id}`);
+      await axiosInstance.delete(`/api/coatings/${id}`);
       fetchCoatings();
     } catch (err) {
       console.error('Failed to delete coating', err);

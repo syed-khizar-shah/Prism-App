@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Edit, Eye, EyeOff, Trash2, Plus, Calendar, Search, Filter, ArrowLeft, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DeletionErrorModal } from '../../components/deletionErrorModal';
+import axiosInstance from '../../../api/axios';
 
 const DesignsList = () => {
-    const baseUrl = import.meta.env.VITE_APP_BASE_URL;
     const [designs, setDesigns] = useState([]);
     const [filteredDesigns, setFilteredDesigns] = useState([]);
     const [deletionError, setDeletionError] = useState(null);
@@ -21,7 +20,7 @@ const DesignsList = () => {
     const fetchDesigns = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${baseUrl}/api/designs`);
+            const res = await axiosInstance.get(`/api/designs`);
             console.log({res})
             const sortedDesigns = res.data.sort((a, b) => {
                 if (sortBy === 'updatedAt') {
@@ -46,7 +45,7 @@ const DesignsList = () => {
     const fetchLenses = async () => {
         try {
             setLensesLoading(true);
-            const res = await axios.get(`${baseUrl}/api/lenses`);
+            const res = await axiosInstance.get(`/api/lenses`);
             setLenses(res.data);
         } catch (err) {
             console.error('Failed to fetch lenses', err);
@@ -94,7 +93,7 @@ const DesignsList = () => {
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this design?')) return;
         try {
-            await axios.delete(`${baseUrl}/api/designs/${id}`);
+            await axiosInstance.delete(`/api/designs/${id}`);
             fetchDesigns();
         } catch (err) {
             if (err.response?.status === 409) {

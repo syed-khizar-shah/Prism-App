@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { ArrowLeft, Check, X } from "lucide-react";
 import { useParams, useNavigate } from 'react-router-dom';
 import ImageUploader from '../../components/imageUploader';
+import axiosInstance from '../../../api/axios';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const RecommendedLensForm = () => {
     const { id } = useParams();
@@ -24,7 +23,7 @@ const RecommendedLensForm = () => {
 
     useEffect(() => {
         if (!id) return;
-        axios.get(`${baseUrl}/api/recommended-lenses/${id}`)
+        axiosInstance.get(`/api/recommended-lenses/${id}`)
             .then(res => {
                 setLens({ ...res.data });
                 setErrors({});
@@ -73,9 +72,9 @@ const RecommendedLensForm = () => {
 
         try {
             const method = id ? 'put' : 'post';
-            const url = id ? `${baseUrl}/api/recommended-lenses/${id}` : `${baseUrl}/api/recommended-lenses`;
+            const url = id ? `/api/recommended-lenses/${id}` : `/api/recommended-lenses`;
 
-            await axios[method](url, payload);
+            await axiosInstance[method](url, payload);
             setSubmitStatus('Lens saved successfully');
             if (!id) {
                 setLens({ code: '', name: '', description: '', image: '', price: '' });

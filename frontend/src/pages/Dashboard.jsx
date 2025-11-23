@@ -1,77 +1,46 @@
-import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const [url, setUrl] = useState('');
+  const navigate = useNavigate();
+
+  const sections = [
+    { label: "Orders", description: "Manage customer orders", path: "/orders" },
+    { label: "Lenses", description: "Lens management", path: "/lenses" },
+    { label: "Colors", description: "Manage lens colors", path: "/colors" },
+    { label: "Coatings", description: "Configure coatings", path: "/coatings" },
+    { label: "Designs", description: "Lens designs", path: "/designs" },
+    { label: "Extras", description: "Add lens extras", path: "/extras" },
+    { label: "Age Groups", description: "Manage age categories", path: "/age-groups" },
+    { label: "Recommended Lenses", description: "Configure recommendations", path: "/recommended-lenses" },
+    { label: "Frame Summary", description: "Summary of frames", path: "/frame-summary-manager" },
+    { label: "Promos", description: "Manage promotions", path: "/promo-manager" },
+  ];
 
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Lens Management Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage your lens catalog, designs, and configurations</p>
+      <header className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-2">
+            Manage your lens catalog, designs, and configurations
+          </p>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Welcome Section */}
-          <div className="bg-white rounded-lg shadow-sm border p-8 mb-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                Welcome to Optix Admin
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Use the navigation bar above to manage different aspects of your lens business.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">Colors</div>
-                  <div className="text-gray-500">Manage lens colors</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">Coatings</div>
-                  <div className="text-gray-500">Configure coatings</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">Lenses</div>
-                  <div className="text-gray-500">Lens management</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">Designs</div>
-                  <div className="text-gray-500">Lens designs</div>
-                </div>
-              </div>
-            </div>
+      {/* Sections */}
+      <main className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sections.map((section) => (
+          <div
+            key={section.label}
+            onClick={() => navigate(section.path)}
+            className="cursor-pointer rounded-xl shadow-md border-2 border-gray-200 p-6 hover:border-black transition duration-300"
+          >
+            <h2 className="text-xl font-bold text-gray-900 mb-2 tracking-wide">{section.label}</h2>
+            <p className="text-gray-500">{section.description}</p>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors">
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">Add New Lens</div>
-                  <div className="text-sm text-gray-500">Create a new lens entry</div>
-                </div>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors">
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">View Reports</div>
-                  <div className="text-sm text-gray-500">Check system statistics</div>
-                </div>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors">
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">Settings</div>
-                  <div className="text-sm text-gray-500">Configure system</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        ))}
+      </main>
     </div>
   );
 }

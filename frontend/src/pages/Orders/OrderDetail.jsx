@@ -326,7 +326,7 @@ export default function OrderDetail() {
             {(order.selections || []).map((selection, idx) => (
               <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="font-medium text-gray-900">{selection.name || selection.id || `Selection ${idx + 1}`}</div>
+                  <div className="font-medium text-gray-900">{selection.name || selection.id || `Frame ${idx + 1}`}</div>
                   <div className="text-sm font-medium text-gray-900">
                     {typeof selection.selectionPrice === 'number' ? `$${selection.selectionPrice.toFixed(2)}` : ''}
                   </div>

@@ -19,7 +19,7 @@ const designRoutes = require('./routes/designRoutes')
 const frameSummaryRoutes = require('./routes/frameSummaryRoutes')
 const promosRoutes = require('./routes/promoRoutes')
 const orderRoutes = require('./routes/orderRoutes')
-
+const userRoutes = require('./routes/user');
 
 
 
@@ -36,6 +36,8 @@ app.use(
 app.use(bodyParser.json())
 
 dbConnect()
+
+app.use("/api/user", userRoutes);
 
 app.use('/api/colors', colorRoutes);
 app.use('/api/coatings', coatingRoutes);

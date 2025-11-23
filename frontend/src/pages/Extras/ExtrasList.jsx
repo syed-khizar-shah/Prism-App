@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { Edit, Trash2, Plus, Search, Package, ArrowLeft } from 'lucide-react'
 import { DeletionErrorModal } from '../../components/deletionErrorModal'
+import axiosInstance from '../../../api/axios'
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL
 
 const ExtrasList = () => {
   const [extras, setExtras] = useState([])
@@ -17,7 +16,7 @@ const ExtrasList = () => {
   const fetchExtras = async () => {
     setLoading(true)
     try {
-      const res = await axios.get(`${baseUrl}/api/extras`)
+      const res = await axiosInstance.get(`/api/extras`)
       setExtras(res.data)
     } catch (err) {
       console.error('Failed to fetch extras', err)
@@ -41,7 +40,7 @@ const ExtrasList = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this extra?')) return;
     try {
-      await axios.delete(`${baseUrl}/api/extras/${id}`);
+      await axiosInstance.delete(`/api/extras/${id}`);
       fetchExtras();
     } catch (err) {
       if (err.response?.status === 409) {

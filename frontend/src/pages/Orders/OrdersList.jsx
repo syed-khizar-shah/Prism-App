@@ -24,10 +24,10 @@ export default function OrdersList() {
       setLoading(true);
       setError('');
       const data = await OrdersAPI.getOrders({ page, limit, status, search });
-      console.log(data)
+      console.log("data: here is ",data)
       // Expecting shape: { data, total, page, limit }
-      setOrders(Array.isArray(data.orders) ? data.orders : (Array.isArray(data) ? data : []));
-      setTotal(typeof data.total === 'number' ? data.total : (Array.isArray(data.data) ? data.data.length : 0));
+      setOrders(data.orders);
+      setTotal(data.total);
     } catch (e) {
       setError(e.message || 'Failed to load orders');
     } finally {

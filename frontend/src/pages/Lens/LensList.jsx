@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Plus, Search, Eye, ArrowLeft } from 'lucide-react';
 import { DeletionErrorModal } from '../../components/deletionErrorModal';
-
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+import axiosInstance from '../../../api/axios';
 
 const LensList = () => {
   const [lenses, setLenses] = useState([]);
@@ -16,7 +14,7 @@ const LensList = () => {
   const fetchLenses = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${baseUrl}/api/lenses`);
+      const res = await axiosInstance.get(`/api/lenses`);
       setLenses(res.data);
     } catch (err) {
       console.error('Failed to fetch lenses', err);
@@ -40,7 +38,7 @@ const LensList = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this lens?')) return;
     try {
-      await axios.delete(`${baseUrl}/api/lenses/${id}`);
+      await axiosInstance.delete(`/api/lenses/${id}`);
       fetchLenses();
     } catch (err) {
       if (err.response?.status === 409) {

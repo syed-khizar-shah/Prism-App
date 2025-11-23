@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import ImageUploader from '../../components/imageUploader';
 import { Trash, Trash2, Check, X, ArrowLeft } from 'lucide-react';
+import axiosInstance from '../../../api/axios';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const LensForm = () => {
     const { id } = useParams();
@@ -28,14 +27,14 @@ const LensForm = () => {
     const [lenses, setLenses] = useState([]); // for subtypeOf options
 
     useEffect(() => {
-        axios.get(`${baseUrl}/api/age-groups`).then(res => setAgeGroups(res.data));
-        axios.get(`${baseUrl}/api/recommended-lenses`).then(res => setRecommendedLenses(res.data));
-        axios.get(`${baseUrl}/api/lenses`).then(res => setLenses(res.data));
+        axiosInstance.get(`/api/age-groups`).then(res => setAgeGroups(res.data));
+        axiosInstance.get(`/api/recommended-lenses`).then(res => setRecommendedLenses(res.data));
+        axiosInstance.get(`/api/lenses`).then(res => setLenses(res.data));
     }, []);
 
     useEffect(() => {
         if (!id) return;
-        axios.get(`${baseUrl}/api/lenses/${id}`).then(res => setLens({
+        axiosInstance.get(`/api/lenses/${id}`).then(res => setLens({
             ...res.data,
             price: res.data.price ?? '',
             subtypeOf: res.data.subtypeOf || null,
@@ -147,9 +146,9 @@ const LensForm = () => {
 
         try {
             const method = id ? 'put' : 'post';
-            const url = id ? `${baseUrl}/api/lenses/${id}` : `${baseUrl}/api/lenses`;
+            const url = id ? `/api/lenses/${id}` : `/api/lenses`;
 
-            await axios[method](url, payload);
+            await axiosInstance[method](url, payload);
             setSubmitStatus('Lens saved successfully');
             if (!id) {
                 setLens({

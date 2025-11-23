@@ -64,30 +64,38 @@ const deletePromo = async (req, res) => {
 const validatePromo = async (req, res) => {
   try {
     const { code } = req.body;
+    if (!code) {
+      return res.json({ valid: false, message: 'Promo code is required' });
+    }
+
     const promo = await Promo.findOne({ code: code.trim().toUpperCase(), isActive: true });
 
     if (!promo) {
-      return res.status(404).json({ message: 'Promo code not found or inactive' });
+      return res.json({ valid: false, message: 'Promo code not found or inactive' });
     }
 
     const now = new Date();
     if (now < promo.startDate || now > promo.endDate) {
-      return res.status(400).json({ message: 'Promo code is expired or not yet active' });
+      return res.json({ valid: false, message: 'Promo code is expired or not yet active' });
     }
 
-    if (promo.usageLimit !== null && promo.usedCount >= promo.usageLimit) {
-      return res.status(400).json({ message: 'Promo usage limit reached' });
+    if (promo.usageLimit != null && promo.usedCount >= promo.usageLimit) {
+      return res.json({ valid: false, message: 'Promo usage limit reached' });
     }
 
-    res.json({
+    // Promo is valid
+    return res.json({
       valid: true,
+      code: promo.code,
       discountType: promo.discountType,
       discountValue: promo.discountValue
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({ valid: false, message: 'Internal server error' });
   }
 };
+
 
 module.exports = {
   createPromo,

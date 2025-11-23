@@ -1,4 +1,4 @@
-const API_BASE_URL = `${import.meta.env.VITE_APP_BASE_URL}/api/orders`;
+import axiosInstance from "../../../api/axios";
 
 class OrdersAPI {
   static async getOrders({ page = 1, limit = 20, status, search } = {}) {
@@ -8,55 +8,55 @@ class OrdersAPI {
     if (status) params.set('status', status);
     if (search) params.set('search', search);
 
-    const response = await fetch(`${API_BASE_URL}?${params.toString()}`);
-    if (!response.ok) throw new Error('Failed to fetch orders');
-    return response.json();
+    const response = await axiosInstance.get(`/api/orders?${params.toString()}`);
+    const data = response.data
+    if (!data.success) throw new Error('Failed to fetch orders');
+    return data;
   }
 
   static async getOrderById(id) {
-    const response = await fetch(`${API_BASE_URL}/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch order');
-    return response.json();
+    const response = await axiosInstance.get(`/api/orders/${id}`);
+    const data = response.data
+    if (!data.success) throw new Error('Failed to fetch order');
+    return data
   }
 
   static async getOrderByOrderId(orderId) {
-    const response = await fetch(`${API_BASE_URL}/by-order-id/${orderId}`);
-    if (!response.ok) throw new Error('Failed to fetch order by orderId');
-    return response.json();
+    const response = await axiosInstance.get(`/api/orders/by-order-id/${orderId}`);
+    const data = response.data
+    if (!data.success) throw new Error('Failed to fetch order');
+    return data;
   }
 
   static async updateOrder(id, data) {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+    const response = await axiosInstance.put(`/api/orders/${id}`, data, {
+      headers: { 'Content-Type': 'application/json' }
     });
-    if (!response.ok) throw new Error('Failed to update order');
-    return response.json();
+    return response.data;
   }
+
 
   static async updateStatus(id, status) {
-    const response = await fetch(`${API_BASE_URL}/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
+    const response = await axiosInstance.patch(`/api/orders/${id}/status`, { status }, {
+      headers: { 'Content-Type': 'application/json' }
     });
-    if (!response.ok) throw new Error('Failed to update status');
-    return response.json();
+    return response.data;
   }
+
 
   static async deleteOrder(id) {
-    const response = await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
-    if (!response.ok) throw new Error('Failed to delete order');
-    return response.json();
+    const response = await axiosInstance.delete(`/api/orders/${id}`);
+    return response.data;
   }
 
+
   static async downloadReceipt(id) {
-    const response = await fetch(`${API_BASE_URL}/${id}/receipt`);
-    if (!response.ok) throw new Error('Failed to generate receipt');
-    const blob = await response.blob();
-    return blob;
+    const response = await axiosInstance.get(`/api/orders/${id}/receipt`, {
+      responseType: 'blob' // important to get the file as a blob
+    });
+    return response.data; // Axios returns the blob directly in response.data
   }
+
 }
 
 export default OrdersAPI;

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import AgeGroupForm from './ageGroupForm'
 import { Edit, Trash2, Users, ArrowLeft } from 'lucide-react'
-
-const baseUrl = import.meta.env.VITE_APP_BASE_URL
+import axiosInstance from '../../../api/axios'
 
 const AgeGroupPage = () => {
   const [ageGroups, setAgeGroups] = useState([])
@@ -14,7 +12,7 @@ const AgeGroupPage = () => {
   const fetchAgeGroups = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`${baseUrl}/api/age-groups`)
+      const res = await axiosInstance.get(`/api/age-groups`)
       setAgeGroups(res.data)
     } catch (err) {
       console.error('Failed to fetch age groups', err)
@@ -47,7 +45,7 @@ const AgeGroupPage = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this age group?')) return
     try {
-      await axios.delete(`${baseUrl}/api/age-groups/${id}`)
+      await axiosInstance.delete(`/api/age-groups/${id}`)
       fetchAgeGroups()
     } catch (err) {
       console.error('Failed to delete age group', err)

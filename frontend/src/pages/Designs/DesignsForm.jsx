@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import ImageUploader from '../../components/imageUploader';
 import { Check, Eye, EyeOff, Plus, X, ArrowLeft } from 'lucide-react';
+import axiosInstance from '../../../api/axios';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const DesignForm = () => {
     const { id } = useParams();
@@ -34,11 +33,11 @@ const DesignForm = () => {
 
     const fetchOptions = async () => {
         const [lens, recommended, coatings, extras, colors] = await Promise.all([
-            axios.get(`${baseUrl}/api/lenses`),
-            axios.get(`${baseUrl}/api/recommended-lenses`),
-            axios.get(`${baseUrl}/api/coatings`),
-            axios.get(`${baseUrl}/api/extras`),
-            axios.get(`${baseUrl}/api/colors`)
+            axiosInstance.get(`/api/lenses`),
+            axiosInstance.get(`/api/recommended-lenses`),
+            axiosInstance.get(`/api/coatings`),
+            axiosInstance.get(`/api/extras`),
+            axiosInstance.get(`/api/colors`)
         ]);
         setLensList(lens.data);
         setRecommendedList(recommended.data);
@@ -51,7 +50,7 @@ const DesignForm = () => {
         const loadData = async () => {
             await fetchOptions();
             if (id) {
-                const res = await axios.get(`${baseUrl}/api/designs/${id}`);
+                const res = await axiosInstance.get(`/api/designs/${id}`);
 
                 // Handle the new extras structure
                 let processedExtras = [];
@@ -223,9 +222,9 @@ const DesignForm = () => {
         const designToSubmit = { ...design, extras: cleanedExtras };
 
         const method = id ? 'put' : 'post';
-        const url = id ? `${baseUrl}/api/designs/${id}` : `${baseUrl}/api/designs`;
+        const url = id ? `/api/designs/${id}` : `/api/designs`;
         try {
-            await axios[method](url, designToSubmit);
+            await axiosInstance[method](url, designToSubmit);
             setSubmitStatus('Design saved successfully');
             if (!id) {
                 setDesign({

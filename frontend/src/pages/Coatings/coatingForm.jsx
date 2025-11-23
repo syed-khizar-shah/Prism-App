@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Check, X } from 'lucide-react';
 import ImageUploader from '../../components/imageUploader';
+import axiosInstance from '../../../api/axios';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const CoatingForm = ({ onCoatingSaved, initialCoating = null, onCancel }) => {
   const [coating, setCoating] = useState({ name: '', image: '', price: '' });
@@ -40,11 +39,11 @@ const CoatingForm = ({ onCoatingSaved, initialCoating = null, onCancel }) => {
     setLoading(true);
     try {
       const url = initialCoating
-        ? `${baseUrl}/api/coatings/${initialCoating._id}`
-        : `${baseUrl}/api/coatings`;
+        ? `/api/coatings/${initialCoating._id}`
+        : `/api/coatings`;
       const method = initialCoating ? 'put' : 'post';
 
-      await axios[method](url, coating);
+      await axiosInstance[method](url, coating);
       setSubmitStatus('Coating saved successfully');
       setCoating({ name: '', image: '', price: '' });
       onCoatingSaved();

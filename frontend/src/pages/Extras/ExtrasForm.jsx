@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { ArrowLeft, Check, X } from "lucide-react";
 import { useParams, useNavigate } from 'react-router-dom';
 import ImageUploader from '../../components/imageUploader';
+import axiosInstance from '../../../api/axios';
 
 const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
@@ -22,7 +22,7 @@ const ExtrasForm = () => {
     
     useEffect(() => {
         if (!id) return;
-        axios.get(`${baseUrl}/api/extras/${id}`)
+        axiosInstance.get(`/api/extras/${id}`)
             .then(res => {
                 const data = res.data;
                 setExtra({
@@ -78,9 +78,9 @@ const ExtrasForm = () => {
 
         try {
             const method = id ? 'put' : 'post';
-            const url = id ? `${baseUrl}/api/extras/${id}` : `${baseUrl}/api/extras`;
+            const url = id ? `/api/extras/${id}` : `/api/extras`;
 
-            await axios[method](url, payload);
+            await axiosInstance[method](url, payload);
             setSubmitStatus('Extra saved successfully');
             if (!id) {
                 setExtra({ name: '', image: '', description: '', price: '' });

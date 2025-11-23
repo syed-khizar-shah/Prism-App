@@ -16,13 +16,16 @@ export const PromoList = ({ promos = [], onEdit, onDelete, loading }) => {
 
   const handleValidatePromo = async () => {
     if (!validationCode.trim()) return;
-    
+
     setValidationLoading(true);
+
     try {
       const result = await PromoAPI.validatePromo(validationCode);
-      setValidationResult({ success: true, ...result });
+
+      // result already contains valid, discountType, discountValue, message
+      setValidationResult(result);
     } catch (error) {
-      setValidationResult({ success: false, message: error.message });
+      setValidationResult({ valid: false, message: error.message });
     } finally {
       setValidationLoading(false);
     }
@@ -79,7 +82,7 @@ export const PromoList = ({ promos = [], onEdit, onDelete, loading }) => {
               <p className="text-sm text-gray-500 mt-1">Manage and monitor your promotional offers</p>
             </div>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
@@ -114,12 +117,11 @@ export const PromoList = ({ promos = [], onEdit, onDelete, loading }) => {
 
           {/* Validation Result */}
           {validationResult && (
-            <div className={`p-4 rounded-md border-l-4 ${
-              validationResult.success 
+            <div className={`p-4 rounded-md border-l-4 ${validationResult.valid
                 ? 'bg-green-50 border-green-400 text-green-700'
                 : 'bg-red-50 border-red-400 text-red-700'
-            }`}>
-              {validationResult.success ? (
+              }`}>
+              {validationResult.valid ? (
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4" />
                   <span className="text-sm font-medium">

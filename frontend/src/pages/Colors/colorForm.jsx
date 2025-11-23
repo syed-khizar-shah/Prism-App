@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Check, X } from 'lucide-react';
+import axiosInstance from '../../../api/axios';
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const ColorForm = ({ initialData, onColorSaved, onCancel }) => {
   const [color, setColor] = useState({ name: '', code: '' });
@@ -37,10 +36,10 @@ const ColorForm = ({ initialData, onColorSaved, onCancel }) => {
     try {
       const method = color._id ? 'put' : 'post';
       const url = color._id
-        ? `${baseUrl}/api/colors/${color._id}`
-        : `${baseUrl}/api/colors`;
+        ? `/api/colors/${color._id}`
+        : `/api/colors`;
 
-      await axios[method](url, color);
+      await axiosInstance[method](url, color);
       setSubmitStatus('Color saved successfully');
       setColor({ name: '', code: '' });
       onColorSaved();

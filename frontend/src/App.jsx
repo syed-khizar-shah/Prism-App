@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './App.css'
 import { createBrowserRouter, RouterProvider, Outlet, useLocation } from 'react-router-dom';
 import ColorPage from './pages/Colors/ColorPage';
@@ -21,11 +20,19 @@ import FrameSummaryManager from './pages/FrameSummary/FrameSummaryManager';
 import PromoManagement from './pages/Promos/PromoManagement';
 import Navbar from './components/Navbar';
 import { OrdersList, OrderDetail } from './pages/Orders';
+import ProtectedRoute from './components/auth/protected-route';
+import { AuthProvider } from '../context/AuthContext';
+import GuestRoute from './components/auth/guest-route';
+
+import Login from "./pages/auth/login"
+import Register from "./pages/auth/register"
+import ErrorPage from "./pages/error-page"
+
 
 
 const Layout = () => {
   const location = useLocation();
-  
+
   return (
     <>
       <Navbar currentPath={location.pathname} />
@@ -41,148 +48,232 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: (
-          <Dashboard />
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/promo-manager',
         element: (
-          <PromoManagement />
+          <ProtectedRoute>
+            <PromoManagement />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/frame-summary-manager',
         element: (
-          <FrameSummaryManager />
+          <ProtectedRoute>
+            <FrameSummaryManager />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/guide',
         element: (
-          <Guide />
+          <ProtectedRoute>
+            <Guide />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/test-flow',
         element: (
-          <LensConfig />
+          <ProtectedRoute>
+            <LensConfig />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/flow',
         element: (
-          <LensConfigurator />
+          <ProtectedRoute>
+            <LensConfigurator />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/colors',
         element: (
-          <ColorPage />
+          <ProtectedRoute>
+            <ColorPage />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/coatings',
         element: (
-          <CoatingPage />
+          <ProtectedRoute>
+            <CoatingPage />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/extras',
         element: (
-          <ExtrasList />
+          <ProtectedRoute>
+            <ExtrasList />
+          </ProtectedRoute>
         ),
       },
       {
         path: '/extras/edit/:id',
         element: (
-          <ExtrasForm />
+          <ProtectedRoute>
+            <ExtrasForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/extras/create',
         element: (
-          <ExtrasForm />
+          <ProtectedRoute>
+            <ExtrasForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/recommended-lenses',
         element: (
-          <RecommendedLensList />
+          <ProtectedRoute>
+            <RecommendedLensList />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/recommended-lenses/edit/:id',
         element: (
-          <RecommendedLensForm />
+          <ProtectedRoute>
+            <RecommendedLensForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/recommended-lenses/create',
         element: (
-          <RecommendedLensForm />
+          <ProtectedRoute>
+            <RecommendedLensForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/lenses',
         element: (
-          <LensList />
+          <ProtectedRoute>
+            <LensList />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/lenses/edit/:id',
         element: (
-          <LensForm />
+          <ProtectedRoute>
+            <LensForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/lenses/create',
         element: (
-          <LensForm />
+          <ProtectedRoute>
+            <LensForm />
+          </ProtectedRoute>
+
         ),
       },
-            {
+      {
         path: '/designs',
         element: (
-          <DesignsList />
+          <ProtectedRoute>
+            <DesignsList />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/designs/edit/:id',
         element: (
-          <DesignForm />
+          <ProtectedRoute>
+            <DesignForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/designs/create',
         element: (
-          <DesignForm />
+          <ProtectedRoute>
+            <DesignForm />
+          </ProtectedRoute>
+
         ),
       },
       {
         path: '/age-groups',
         element: (
-          <AgeGroupPage />
+          <ProtectedRoute>
+            <AgeGroupPage />
+          </ProtectedRoute>
+
         )
       },
       {
         path: '/orders',
         element: (
-          <OrdersList />
+          <ProtectedRoute>
+            <OrdersList />
+          </ProtectedRoute>
+
         )
       },
       {
         path: '/orders/:id',
         element: (
-          <OrderDetail />
+          <ProtectedRoute>
+            <OrderDetail />
+          </ProtectedRoute>
+
         )
       },
     ],
+  },
+  {
+    path: '/login',
+    element: (
+      <GuestRoute>
+        <Login />
+      </GuestRoute>
+    ),
+  },
+  // {
+  //   path: '/register',
+  //   element: (
+  //     <GuestRoute>
+  //       <Register />
+  //     </GuestRoute>
+  //   ),
+  // },
+  {
+    path: '*',
+    element: <ErrorPage />,
   },
 ]);
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 }
 

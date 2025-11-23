@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import ColorForm from './colorForm'
 import { DeletionErrorModal } from '../../components/deletionErrorModal'
 import { Edit, Trash2, Palette, ArrowLeft } from 'lucide-react'
+import axiosInstance from '../../../api/axios'
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL
 
 const ColorPage = () => {
   const [colors, setColors] = useState([])
@@ -16,7 +15,7 @@ const ColorPage = () => {
   const fetchColors = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`${baseUrl}/api/colors`)
+      const res = await axiosInstance.get(`/api/colors`)
       setColors(res.data)
     } catch (err) {
       console.error('Failed to fetch colors', err)
@@ -28,7 +27,7 @@ const ColorPage = () => {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this color?')) return;
     try {
-      await axios.delete(`${baseUrl}/api/colors/${id}`);
+      await axiosInstance.delete(`/api/colors/${id}`);
       fetchColors();
     } catch (err) {
       if (err.response?.status === 409) {

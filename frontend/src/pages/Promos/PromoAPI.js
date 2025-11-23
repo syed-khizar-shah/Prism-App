@@ -1,49 +1,38 @@
-// services/promosAPI.js
-const API_BASE_URL = `${import.meta.env.VITE_APP_BASE_URL}/api/promos`;
+import axiosInstance from "../../../api/axios";
+
+const API_BASE_URL = `/api/promos`;
 
 class PromoAPI {
   static async getPromos() {
-    const response = await fetch(API_BASE_URL);
-    if (!response.ok) throw new Error('Failed to fetch promos');
-    return response.json();
+    const response = await axiosInstance.get(API_BASE_URL);
+    return response.data;
   }
 
   static async createPromo(promo) {
-    const response = await fetch(API_BASE_URL, {
-      method: 'POST',
+    const response = await axiosInstance.post(API_BASE_URL, promo, {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(promo)
     });
-    if (!response.ok) throw new Error('Failed to create promo');
-    return response.json();
+    return response.data;
   }
 
   static async updatePromo(id, promo) {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: 'PUT',
+    const response = await axiosInstance.put(`${API_BASE_URL}/${id}`, promo, {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(promo)
     });
-    if (!response.ok) throw new Error('Failed to update promo');
-    return response.json();
+    return response.data;
   }
 
   static async deletePromo(id) {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: 'DELETE'
-    });
-    if (!response.ok) throw new Error('Failed to delete promo');
-    return response.json();
+    const response = await axiosInstance.delete(`${API_BASE_URL}/${id}`);
+    return response.data;
   }
 
   static async validatePromo(code) {
-    const response = await fetch(`${API_BASE_URL}/validate`, {
-      method: 'POST',
+    const response = await axiosInstance.post(`${API_BASE_URL}/validate`, { code }, {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
     });
-    if (!response.ok) throw new Error('Failed to validate promo');
-    return response.json();
+    console.log({res: response})
+    return response.data;
   }
 }
 

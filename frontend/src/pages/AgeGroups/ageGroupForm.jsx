@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import { Check, X } from 'lucide-react'
 import ImageUploader from '../../components/imageUploader'
+import axiosInstance from '../../../api/axios'
 
-const baseUrl = import.meta.env.VITE_APP_BASE_URL
 
 const AgeGroupForm = ({ onSaved, initialData, onCancel }) => {
     const [ageGroup, setAgeGroup] = useState({ name: '', image: '' })
@@ -47,11 +46,11 @@ const AgeGroupForm = ({ onSaved, initialData, onCancel }) => {
         try {
             if (initialData && initialData._id) {
                 // Update existing age group
-                await axios.put(`${baseUrl}/api/age-groups/${initialData._id}`, ageGroup)
+                await axiosInstance.put(`/api/age-groups/${initialData._id}`, ageGroup)
                 setSubmitStatus('Age group updated successfully')
             } else {
                 // Create new age group
-                await axios.post(`${baseUrl}/api/age-groups`, ageGroup)
+                await axiosInstance.post(`/api/age-groups`, ageGroup)
                 setSubmitStatus('Age group saved successfully')
                 setAgeGroup({ name: '', image: '' })
             }
