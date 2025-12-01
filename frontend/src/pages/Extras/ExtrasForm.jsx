@@ -14,7 +14,7 @@ const ExtrasForm = () => {
         name: '',
         image: '',
         description: '',
-        price: '',
+        price: 0,
     });
     const [errors, setErrors] = useState({});
     const [submitStatus, setSubmitStatus] = useState(null);
@@ -36,7 +36,7 @@ const ExtrasForm = () => {
                     name: '',
                     image: '',
                     description: '',
-                    price: '',
+                    price: 0,
                 });
             });
     }, [id]);
@@ -44,7 +44,7 @@ const ExtrasForm = () => {
     const validate = () => {
         const errs = {};
         if (!extra.name) errs.name = 'Name is required';
-        if (extra.price === '' || extra.price < 0) errs.price = 'Valid price is required';
+        if (isNaN(extra.price) || extra.price < 0) errs.price = 'Valid price is required';
         setErrors(errs);
         return Object.keys(errs).length === 0;
     };
@@ -53,7 +53,7 @@ const ExtrasForm = () => {
         const { name, value } = e.target;
         setExtra(prev => ({
             ...prev,
-            [name]: name === 'price' ? parseFloat(value) || '' : value
+            [name]: name === 'price' ? parseFloat(value) || 0 : value
         }));
     };
 
@@ -83,7 +83,7 @@ const ExtrasForm = () => {
             await axiosInstance[method](url, payload);
             setSubmitStatus('Extra saved successfully');
             if (!id) {
-                setExtra({ name: '', image: '', description: '', price: '' });
+                setExtra({ name: '', image: '', description: '', price: 0 });
             }
             navigate('/extras');
         } catch (error) {

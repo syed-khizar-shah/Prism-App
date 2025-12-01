@@ -1,4 +1,5 @@
 const Order = require('../models/OrderSchema');
+const { generateReceiptBuffer } = require('../utils/pdf/pdf');
 const pdfService = require('../services/pdfService');
 
 // Create a new order
@@ -217,44 +218,44 @@ const getOrderByOrderId = async (req, res) => {
 };
 
 // Update an order
-const updateOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
+// const updateOrder = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updateData = req.body;
 
-    // Remove fields that shouldn't be updated directly
-    delete updateData._id;
-    delete updateData.orderId;
-    delete updateData.createdAt;
+//     // Remove fields that shouldn't be updated directly
+//     delete updateData._id;
+//     delete updateData.orderId;
+//     delete updateData.createdAt;
 
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { ...updateData, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    );
+//     const order = await Order.findByIdAndUpdate(
+//       id,
+//       { ...updateData, updatedAt: new Date() },
+//       { new: true, runValidators: true }
+//     );
 
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'Order not found'
-      });
-    }
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         error: 'Order not found'
+//       });
+//     }
 
-    res.json({
-      success: true,
-      order,
-      message: 'Order updated successfully'
-    });
+//     res.json({
+//       success: true,
+//       order,
+//       message: 'Order updated successfully'
+//     });
 
-  } catch (error) {
-    console.error('Error updating order:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update order',
-      details: error.message
-    });
-  }
-};
+//   } catch (error) {
+//     console.error('Error updating order:', error);
+//     res.status(500).json({
+//       success: false,
+//       error: 'Failed to update order',
+//       details: error.message
+//     });
+//   }
+// };
 
 // Delete an order
 const deleteOrder = async (req, res) => {
@@ -388,7 +389,8 @@ const generateReceipt = async (req, res) => {
     }
 
     // Generate PDF in memory
-    const pdfBuffer = await pdfService.generateReceiptBuffer(order);
+    // const pdfBuffer = await pdfService.generateReceiptBuffer(order);
+    const pdfBuffer = await generateReceiptBuffer(order);
 
     // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
@@ -415,7 +417,6 @@ module.exports = {
   getOrders,
   getOrderById,
   getOrderByOrderId,
-  updateOrder,
   deleteOrder,
   updateOrderStatus,
   searchOrders,

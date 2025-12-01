@@ -14,7 +14,7 @@ cloudinary.config({
 
 router.post(
   '/',
-  upload.array('images', 10), // up to 10 images
+  upload.array('images', 1), // up to 10 images
   async (req, res) => {
     const files = req.files;
     const uploadedImages = [];

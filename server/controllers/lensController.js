@@ -24,7 +24,9 @@ exports.getAllLenses = async (req, res) => {
                    .populate('subtypeOf');
     }
 
+    
     const lenses = await query;
+    console.log({lenses})
     res.json(lenses);
   } catch (err) {
     console.error('Error in getAllLenses:', err);
@@ -48,6 +50,7 @@ exports.getLensById = async (req, res) => {
 
     const lens = await query;
     if (!lens) return res.status(404).json({ error: 'Lens not found' });
+    console.log({lens})
     
     res.json(lens);
   } catch (err) {
@@ -78,6 +81,7 @@ exports.createLens = async (req, res) => {
 exports.updateLens = async (req, res) => {
   try {
     const { populate } = req.query;
+    console.log("update: ",populate)
     
     let lens = await Lens.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

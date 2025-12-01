@@ -21,6 +21,27 @@ const getPromos = async (req, res) => {
   }
 };
 
+const getValidPromos = async (req, res) => {
+  try {
+    const promos = await Promo.find({ isActive: true });
+
+    const now = new Date();
+
+    const validPromos = promos.filter(promo => {
+      const dateValid = promo.startDate <= now && promo.endDate >= now;
+
+      const usageValid =
+        promo.usageLimit === null || promo.usedCount < promo.usageLimit;
+
+      return dateValid && usageValid;
+    });
+
+    res.json(validPromos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get a single promo by ID
 const getPromoById = async (req, res) => {
   try {
@@ -100,6 +121,7 @@ const validatePromo = async (req, res) => {
 module.exports = {
   createPromo,
   getPromos,
+  getValidPromos,
   getPromoById,
   updatePromo,
   deletePromo,

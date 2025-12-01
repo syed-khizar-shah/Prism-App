@@ -8,7 +8,7 @@ export default function OrderDetail() {
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const fetchOrder = async () => {
@@ -29,18 +29,18 @@ export default function OrderDetail() {
     fetchOrder();
   }, [id]);
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      await OrdersAPI.updateOrder(id, order);
-      await fetchOrder();
-      alert('Order updated');
-    } catch (e) {
-      alert(e.message || 'Failed to update order');
-    } finally {
-      setSaving(false);
-    }
-  };
+  // const handleSave = async () => {
+  //   try {
+  //     setSaving(true);
+  //     await OrdersAPI.updateOrder(id, order);
+  //     await fetchOrder();
+  //     alert('Order updated');
+  //   } catch (e) {
+  //     alert(e.message || 'Failed to update order');
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
   const handleStatusChange = async (newStatus) => {
     try {
@@ -120,7 +120,7 @@ export default function OrderDetail() {
                 <FileText className="w-4 h-4" />
                 Download Receipt
               </button>
-              <button 
+              {/* <button 
                 onClick={handleSave} 
                 disabled={saving} 
                 className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -131,7 +131,7 @@ export default function OrderDetail() {
                   <Save className="w-4 h-4" />
                 )}
                 {saving ? 'Saving...' : 'Save Changes'}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -174,6 +174,7 @@ export default function OrderDetail() {
                     <input
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                       value={order.payment?.method || ''}
+                      disabled
                       onChange={(e) => setOrder({ ...order, payment: { ...order.payment, method: e.target.value } })}
                     />
                   </div>
@@ -183,6 +184,7 @@ export default function OrderDetail() {
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
                       <input
                         type="number"
+                        disabled
                         className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                         value={order.payment?.amount ?? ''}
                         onChange={(e) => setOrder({ ...order, payment: { ...order.payment, amount: Number(e.target.value) } })}
@@ -194,6 +196,7 @@ export default function OrderDetail() {
                     <input
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                       value={order.payment?.transactionId || ''}
+                      disabled
                       onChange={(e) => setOrder({ ...order, payment: { ...order.payment, transactionId: e.target.value } })}
                     />
                   </div>
@@ -217,6 +220,7 @@ export default function OrderDetail() {
                 <input
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                   value={order.customer?.name || ''}
+                  disabled
                   onChange={(e) => setOrder({ ...order, customer: { ...order.customer, name: e.target.value } })}
                 />
               </div>
@@ -225,6 +229,7 @@ export default function OrderDetail() {
                 <input
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                   value={order.customer?.email || ''}
+                  disabled
                   onChange={(e) => setOrder({ ...order, customer: { ...order.customer, email: e.target.value } })}
                 />
               </div>
@@ -233,6 +238,7 @@ export default function OrderDetail() {
                 <input
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                   value={order.customer?.phone || ''}
+                  disabled
                   onChange={(e) => setOrder({ ...order, customer: { ...order.customer, phone: e.target.value } })}
                 />
               </div>
@@ -257,6 +263,7 @@ export default function OrderDetail() {
                     type="number"
                     className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                     value={order.pricing?.subtotal ?? ''}
+                    disabled
                     onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, subtotal: Number(e.target.value) } })}
                   />
                 </div>
@@ -269,6 +276,7 @@ export default function OrderDetail() {
                     type="number"
                     className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                     value={order.pricing?.discount ?? ''}
+                    disabled
                     onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, discount: Number(e.target.value) } })}
                   />
                 </div>
@@ -281,6 +289,7 @@ export default function OrderDetail() {
                     type="number"
                     className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                     value={order.pricing?.tax ?? ''}
+                    disabled
                     onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, tax: Number(e.target.value) } })}
                   />
                 </div>
@@ -293,6 +302,7 @@ export default function OrderDetail() {
                     type="number"
                     className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                     value={order.pricing?.shipping ?? ''}
+                    disabled
                     onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, shipping: Number(e.target.value) } })}
                   />
                 </div>
@@ -305,6 +315,7 @@ export default function OrderDetail() {
                     type="number"
                     className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm font-medium bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                     value={order.pricing?.totalPrice ?? ''}
+                    disabled
                     onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, totalPrice: Number(e.target.value) } })}
                   />
                 </div>
@@ -314,46 +325,120 @@ export default function OrderDetail() {
         </div>
 
         {/* Selections Section */}
-        <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6">
+        <div className="mt-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="h-8 w-8 bg-orange-100 rounded-lg flex items-center justify-center">
               <Package className="w-4 h-4 text-orange-600" />
             </div>
             <h3 className="text-lg font-medium text-gray-900">Order Selections</h3>
           </div>
-          
-          <div className="space-y-4">
-            {(order.selections || []).map((selection, idx) => (
-              <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-medium text-gray-900">{selection.name || selection.id || `Frame ${idx + 1}`}</div>
-                  <div className="text-sm font-medium text-gray-900">
-                    {typeof selection.selectionPrice === 'number' ? `$${selection.selectionPrice.toFixed(2)}` : ''}
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                  <div><span className="text-gray-600">Age:</span> {selection.ageGroup?.name || 'N/A'}</div>
-                  <div><span className="text-gray-600">Type:</span> {selection.lensType?.name || 'N/A'}</div>
-                  <div><span className="text-gray-600">Subtype:</span> {selection.lensSubtype?.name || 'N/A'}</div>
-                  <div><span className="text-gray-600">Design:</span> {selection.design?.name || 'N/A'}</div>
-                  <div><span className="text-gray-600">Coatings:</span> {selection.coatings?.name || 'N/A'}</div>
-                  <div><span className="text-gray-600">Extras:</span> {selection.extras?.name || 'N/A'}</div>
-                  <div><span className="text-gray-600">Color:</span> {selection.color?.name || 'N/A'}</div>
-                  {selection.powerMap && (
-                    <div><span className="text-gray-600">Power:</span> {selection.powerMap.min} - {selection.powerMap.max}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-            {(!order.selections || order.selections.length === 0) && (
-              <div className="text-center py-8 text-gray-500">
-                <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">No selections found</p>
-              </div>
-            )}
-          </div>
+          <SelectionsTable order={order}/>
         </div>
       </div>
     </div>
   );
 }
+
+
+const SelectionsTable = ({ order }) => {
+  if (!order?.selections?.length) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {order.selections.map((selection, index) => (
+        <div key={selection.id || index}>
+          <SelectionTable data={selection} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
+const SelectionTable = ({ data }) => {
+  if (!data) return null;
+
+  const rows = [
+    { label: "Age Group", value: data.ageGroup?.name, price: data.ageGroup?.price },
+    { label: "Lens Type", value: data.lensType?.name, price: data.lensType?.price },
+    { label: "Lens Subtype", value: data.lensSubtype?.name, price: data.lensSubtype?.price },
+    {
+      label: "Power Range",
+      value: data.powerMap?.min != null && data.powerMap?.max != null 
+        ? `${data.powerMap.min} to ${data.powerMap.max}` 
+        : null,
+      price: null
+    },
+    { label: "Recommended Lens", value: data.recommendedLens?.name, price: data.recommendedLens?.price },
+    { label: "Design", value: data.design?.name, price: data.design?.price },
+    { label: "Extras", value: data.extras?.name, price: data.extras?.price },
+    {
+      label: "Color",
+      value: data.color ? (
+        <div className="flex items-center gap-2">
+          {data.color.name}
+          <span
+            className="h-4 w-4 rounded-full border"
+            style={{ backgroundColor: data.color.code }}
+          />
+        </div>
+      ) : null,
+      price: null,
+    },
+  ];
+
+  if (data.frameData) {
+    Object.values(data.frameData).forEach((item) => {
+      rows.push({
+        label: item.name,
+        value: item.value,
+        price: null,
+      });
+    });
+  }
+
+  return (
+    <div className="w-full max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+      <h2 className="text-xl font-semibold mb-4">{data.name || "Selection"}</h2>
+
+      <table className="w-full text-left table-auto border-collapse">
+        <thead>
+          <tr className="border-b border-gray-300">
+            <th className="py-2 px-3 text-gray-500">Item</th>
+            <th className="py-2 px-3 text-gray-500">Value</th>
+            <th className="py-2 px-3 text-gray-500">Price (£)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => {
+            const isMissing = row.value === null || row.value === undefined;
+            const textClass = isMissing ? "text-gray-400" : "text-gray-900";
+
+            return (
+              <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : ""}>
+                <td className={`py-2 px-3 ${isMissing ? "text-gray-400" : "text-gray-700"}`}>
+                  {row.label}
+                </td>
+                <td className={`py-2 px-3 ${textClass}`}>
+                  {isMissing ? "-" : row.value}
+                </td>
+                <td className={`py-2 px-3 ${textClass}`}>
+                  {row.price != null ? row.price : "-"}
+                </td>
+              </tr>
+            );
+          })}
+
+          <tr className="border-t border-gray-300 font-semibold">
+            <td className="py-2 px-3">Total</td>
+            <td className="py-2 px-3"></td>
+            <td className="py-2 px-3">{data.selectionPrice}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+
+

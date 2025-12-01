@@ -14,7 +14,7 @@ const RecommendedLensForm = () => {
         name: '',
         description: '',
         image: '',
-        price: ''
+        price: 0
     });
 
     const [errors, setErrors] = useState({});
@@ -30,7 +30,7 @@ const RecommendedLensForm = () => {
                 setSubmitStatus(null);
             })
             .catch(() => {
-                setLens({ code: '', name: '', description: '', image: '', price: '' });
+                setLens({ code: '', name: '', description: '', image: '', price: 0 });
             });
     }, [id]);
 
@@ -38,7 +38,7 @@ const RecommendedLensForm = () => {
         const errs = {};
         if (!lens.code) errs.code = 'Code is required';
         if (!lens.name) errs.name = 'Name is required';
-        if (lens.price === '' || lens.price < 0) errs.price = 'Valid price is required';
+        if (isNaN(lens.price) || lens.price < 0) errs.price = 'Valid price is required';
         setErrors(errs);
         return Object.keys(errs).length === 0;
     };
@@ -47,7 +47,7 @@ const RecommendedLensForm = () => {
         const { name, value } = e.target;
         setLens(prev => ({
             ...prev,
-            [name]: name === 'price' ? parseFloat(value) || '' : value
+            [name]: name === 'price' ? parseFloat(value) || 0 : value
         }));
     };
 
@@ -77,7 +77,7 @@ const RecommendedLensForm = () => {
             await axiosInstance[method](url, payload);
             setSubmitStatus('Lens saved successfully');
             if (!id) {
-                setLens({ code: '', name: '', description: '', image: '', price: '' });
+                setLens({ code: '', name: '', description: '', image: '', price: 0 });
             }
             navigate('/recommended-lenses');
         } catch (error) {

@@ -25,7 +25,7 @@ router.get('/:id', getOrderById);
 router.get('/by-order-id/:orderId', getOrderByOrderId);
 
 // Update an order
-router.put('/:id', updateOrder);
+// router.put('/:id', updateOrder);
 
 // Delete an order
 router.delete('/:id', deleteOrder);

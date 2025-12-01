@@ -12,7 +12,7 @@ const LensForm = () => {
     const [lens, setLens] = useState({
         name: '',
         type: '',
-        price: '',
+        price: 0,
         image: '',
         description: '',
         ageGroups: [],
@@ -36,7 +36,7 @@ const LensForm = () => {
         if (!id) return;
         axiosInstance.get(`/api/lenses/${id}`).then(res => setLens({
             ...res.data,
-            price: res.data.price ?? '',
+            price: res.data.price ?? 0,
             subtypeOf: res.data.subtypeOf || null,
         }));
     }, [id]);
@@ -47,7 +47,7 @@ const LensForm = () => {
 
         if (!lens.name) errs.name = 'Name is required';
         if (!lens.type) errs.type = 'Type is required';
-        if (lens.price === '' || lens.price < 0) errs.price = 'Valid price is required';
+        if (lens.price < 0 || isNaN(lens.price)) errs.price = 'Valid price is required';
 
         if (lens.powerLensMap.length < 1) {
             errs.powerLensMap = "At least 1 Power to Lens Mapping is required";
@@ -78,7 +78,7 @@ const LensForm = () => {
         const { name, value } = e.target;
         setLens(prev => ({
             ...prev,
-            [name]: name === 'price' ? parseFloat(value) || '' : value
+            [name]: name === 'price' ? parseFloat(value) || 0 : value
         }));
     };
 
@@ -148,13 +148,14 @@ const LensForm = () => {
             const method = id ? 'put' : 'post';
             const url = id ? `/api/lenses/${id}` : `/api/lenses`;
 
-            await axiosInstance[method](url, payload);
+            const res = await axiosInstance[method](url, payload);
+            console.log({res});
             setSubmitStatus('Lens saved successfully');
             if (!id) {
                 setLens({
                     name: '',
                     type: '',
-                    price: '',
+                    price: 0,
                     image: '',
                     description: '',
                     ageGroups: [],
@@ -162,7 +163,7 @@ const LensForm = () => {
                     subtypeOf: null,
                 });
             }
-            navigate('/lenses');
+            // navigate('/lenses');
         } catch (err) {
             const msg = err.response?.data?.message || err.message;
             setSubmitStatus(`Error: ${msg}`);

@@ -5,26 +5,27 @@ import axiosInstance from '../../../api/axios';
 
 
 const CoatingForm = ({ onCoatingSaved, initialCoating = null, onCancel }) => {
-  const [coating, setCoating] = useState({ name: '', image: '', price: '' });
+  const [coating, setCoating] = useState({ name: '', image: '', price: 0 });
   const [errors, setErrors] = useState({});
   const [submitStatus, setSubmitStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log({initialCoating})
     if (initialCoating) setCoating(initialCoating);
   }, [initialCoating]);
 
   const validate = () => {
     const errs = {};
     if (!coating.name) errs.name = 'Coating name is required';
-    if (coating.price === '' || coating.price < 0) errs.price = 'Valid price is required';
+    if (coating.price < 0 || isNaN(coating.price)) errs.price = 'Valid price is required';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCoating((prev) => ({ ...prev, [name]: name === "price" ? parseFloat(value) || '' : value }));
+    setCoating((prev) => ({ ...prev, [name]: name === "price" ? parseFloat(value) || 0 : value }));
   };
 
   const handleImageUpload = (url) => {

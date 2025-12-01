@@ -13,7 +13,7 @@ const DesignForm = () => {
         name: '',
         image: '',
         description: '',
-        price: '',
+        price: 0,
         isVisible: true,
         lensType: '', // Changed to single selection
         recommendedLens: [], // Changed to single selection
@@ -141,7 +141,7 @@ const DesignForm = () => {
         const errs = {};
         if (!design.name) errs.name = 'Name is required';
         if (!design.lensType) errs.lensType = 'Lens type is required';
-        if (design.price === '' || design.price < 0) errs.price = 'Valid price is required';
+        if (isNaN(design.price) || design.price < 0) errs.price = 'Valid price is required';
         // Add this if you want to ensure isVisible is always a boolean:
         if (typeof design.isVisible !== 'boolean') errs.isVisible = 'Visibility must be set';
         setErrors(errs);
@@ -152,7 +152,7 @@ const DesignForm = () => {
         const { name, value } = e.target;
         setDesign(prev => ({
             ...prev,
-            [name]: name === 'price' ? (value === '' ? '' : parseFloat(value) || 0) : value
+            [name]: name === 'price' ? parseFloat(value) || 0 : value
         }));
     };
 
@@ -231,7 +231,7 @@ const DesignForm = () => {
                     name: '',
                     image: '',
                     description: '',
-                    price: '',
+                    price: 0,
                     lensType: '',
                     recommendedLens: '',
                     coatings: [],
