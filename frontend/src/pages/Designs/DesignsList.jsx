@@ -21,7 +21,7 @@ const DesignsList = () => {
         try {
             setLoading(true);
             const res = await axiosInstance.get(`/api/designs`);
-            console.log({res})
+            console.log({ res })
             const sortedDesigns = res.data.sort((a, b) => {
                 if (sortBy === 'updatedAt') {
                     return new Date(b.updatedAt) - new Date(a.updatedAt);
@@ -61,33 +61,32 @@ const DesignsList = () => {
 
     useEffect(() => {
         let filtered = designs;
-        
+
         // Search filter
         if (searchTerm) {
-            filtered = filtered.filter(design => 
+            filtered = filtered.filter(design =>
                 design.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 design.description?.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
-        
+
         // Visibility filter
         if (visibilityFilter !== 'all') {
-            filtered = filtered.filter(design => 
+            filtered = filtered.filter(design =>
                 visibilityFilter === 'visible' ? design.isVisible : !design.isVisible
             );
         }
 
         // Lens filter
         if (lensFilter !== 'all') {
-            filtered = filtered.filter(design => 
+            filtered = filtered.filter(design =>
                 design.lensType && design.lensType._id && design.lensType._id === lensFilter
             );
         }
-        
+
         setFilteredDesigns(filtered);
     }, [designs, searchTerm, visibilityFilter, lensFilter]);
 
-    const handleEdit = (id) => navigate(`/designs/edit/${id}`);
     const handleCreate = () => navigate(`/designs/create`);
 
     const handleDelete = async (id) => {
@@ -106,23 +105,6 @@ const DesignsList = () => {
                 alert('Failed to delete design');
             }
         }
-    };
-
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(price);
     };
 
     const handleReferenceClick = (reference) => {
@@ -187,23 +169,28 @@ const DesignsList = () => {
                             </p>
                         </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="bg-white p-3 rounded-lg border border-gray-200">
-                                <h4 className="font-medium text-gray-900 mb-2">Customer-Facing Designs</h4>
+                                <h4 className="font-medium text-gray-900 mb-2">Visible Designs</h4>
                                 <p className="text-sm text-gray-600">
-                                    Visible to customers and available for purchase. These represent complete lens solutions.
+                                    These designs appear in the app and are shown to users in the design step.
+                                    You can add multiple options for the same lens + recommended lens combination.
                                 </p>
                             </div>
+
                             <div className="bg-white p-3 rounded-lg border border-gray-200">
                                 <h4 className="font-medium text-gray-900 mb-2">Configuration Designs</h4>
                                 <p className="text-sm text-gray-600">
-                                    Internal templates used for setup and configuration. Not visible to customers.
+                                    These are used when the design selection step is not required, but extras,
+                                    coatings, or colors still need to be chosen. Only one design should exist
+                                    per lens + recommended lens combination, so it can be selected automatically.
                                 </p>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 {/* Filters and Search */}
@@ -277,113 +264,20 @@ const DesignsList = () => {
                         <div className="flex flex-col space-y-4">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                    <h2 className="text-xl font-medium text-gray-900">Customer-Facing Designs</h2>
+                                    <h2 className="text-xl font-medium text-gray-900">Visible Designs</h2>
                                     <p className="text-sm text-gray-500 mt-1">
-                                        {filteredDesigns.filter(d => d.isVisible).length} visible designs • These designs are available to customers
+                                        {filteredDesigns.filter(d => d.isVisible).length} visible designs • These designs are available to for selection in design step
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <DesignTable
+                        designs={filteredDesigns.filter(d => d.isVisible)}
+                        status="visible"
+                        onDelete={handleDelete}
+                    />
 
-                    {/* Visible Designs Table */}
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {filteredDesigns.filter(d => d.isVisible).map((design) => (
-                                    <tr key={design._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {design.image ? (
-                                                <img
-                                                    src={design.image}
-                                                    alt={design.name}
-                                                    className="h-16 w-16 object-cover rounded-lg border border-gray-200"
-                                                />
-                                            ) : (
-                                                <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                    <Package className="w-6 h-6 text-gray-400" />
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-gray-900">{design.name}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900 max-w-xs">
-                                                {design.description || <span className="text-gray-400 italic">No description</span>}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{formatPrice(design.price)}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <Eye className="w-3 h-3" />
-                                                Visible
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">
-                                                {design.updatedAt ? formatDate(design.updatedAt) : 'N/A'}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex gap-1">
-                                                <button
-                                                    onClick={() => handleEdit(design._id)}
-                                                    className="text-gray-400 hover:text-gray-600 p-2 rounded transition-colors"
-                                                    title="Edit design"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(design._id)}
-                                                    className="text-gray-400 hover:text-red-600 p-2 rounded transition-colors"
-                                                    title="Delete design"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        {filteredDesigns.filter(d => d.isVisible).length === 0 && (
-                            <div className="text-center py-12">
-                                <div className="text-gray-400 mb-2">
-                                    <Package className="w-12 h-12 mx-auto" />
-                                </div>
-                                <p className="text-gray-500 text-sm">No visible designs found</p>
-                                <p className="text-gray-400 text-xs mt-1">
-                                    {searchTerm || visibilityFilter !== 'all' || lensFilter !== 'all'
-                                        ? "Try adjusting your search or filters" 
-                                        : "Create your first visible design to get started"}
-                                </p>
-                                {!searchTerm && visibilityFilter === 'all' && lensFilter === 'all' && (
-                                    <button
-                                        onClick={handleCreate}
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors mt-3"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Create Your First Design
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 {/* Configuration Designs Section */}
@@ -402,94 +296,13 @@ const DesignsList = () => {
                     </div>
 
                     {/* Configuration Designs Table */}
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {filteredDesigns.filter(d => !d.isVisible).map((design) => (
-                                    <tr key={design._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {design.image ? (
-                                                <img
-                                                    src={design.image}
-                                                    alt={design.name}
-                                                    className="h-16 w-16 object-cover rounded-lg border border-gray-200"
-                                                />
-                                            ) : (
-                                                <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                    <Package className="w-6 h-6 text-gray-400" />
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-gray-900">{design.name}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900 max-w-xs">
-                                                {design.description || <span className="text-gray-400 italic">No description</span>}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{formatPrice(design.price)}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                <EyeOff className="w-3 h-3" />
-                                                Configuration
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">
-                                                {design.updatedAt ? formatDate(design.updatedAt) : 'N/A'}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex gap-1">
-                                                <button
-                                                    onClick={() => handleEdit(design._id)}
-                                                    className="text-gray-400 hover:text-gray-600 p-2 rounded transition-colors"
-                                                    title="Edit design"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(design._id)}
-                                                    className="text-gray-400 hover:text-red-600 p-2 rounded transition-colors"
-                                                    title="Delete design"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
 
-                        {filteredDesigns.filter(d => !d.isVisible).length === 0 && (
-                            <div className="text-center py-12">
-                                <div className="text-gray-400 mb-2">
-                                    <Package className="w-12 h-12 mx-auto" />
-                                </div>
-                                <p className="text-gray-500 text-sm">No configuration designs found</p>
-                                <p className="text-gray-400 text-xs mt-1">
-                                    {searchTerm || visibilityFilter !== 'all' || lensFilter !== 'all'
-                                        ? "Try adjusting your search or filters" 
-                                        : "Configuration designs are used for internal setup and are not visible to customers"}
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                    <DesignTable
+                        designs={filteredDesigns.filter(d => !d.isVisible)}
+                        status="config"
+                        onDelete={handleDelete}
+                    />
+
                 </div>
 
                 {/* Deletion Error Modal */}
@@ -503,5 +316,115 @@ const DesignsList = () => {
         </div>
     );
 };
+
+function DesignTable({ designs, status, onDelete }) {
+    const isVisible = status === "visible";
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'GBP'
+        }).format(price);
+    };
+
+    return (
+        <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                    <tr>
+                        {["Image", "Name", "Description", "Price", "Status", "Updated", "Actions"].map(h => (
+                            <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {h}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+
+                <tbody className="bg-white divide-y divide-gray-200">
+                    {designs.map((d) => (
+                        <tr key={d._id} className="hover:bg-gray-50 transition">
+                            <td className="px-6 py-4">
+                                {d.image ? (
+                                    <img src={d.image} alt={d.name} className="h-16 w-16 object-cover rounded-lg border" />
+                                ) : (
+                                    <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <Package className="w-6 h-6 text-gray-400" />
+                                    </div>
+                                )}
+                            </td>
+
+                            <td className="px-6 py-4">
+                                <div className="text-sm font-medium text-gray-900">{d.name}</div>
+                            </td>
+
+                            <td className="px-6 py-4">
+                                <div className="text-sm text-gray-900 max-w-xs">
+                                    {d.description || (
+                                        <span className="text-gray-400 italic">No description</span>
+                                    )}
+                                </div>
+                            </td>
+
+                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                {formatPrice(d.price)}
+                            </td>
+
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                {isVisible ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                        <Eye className="w-3 h-3" /> Visible
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+                                        <EyeOff className="w-3 h-3" /> Configuration
+                                    </span>
+                                )}
+                            </td>
+
+                            <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                {d.updatedAt ? formatDate(d.updatedAt) : 'N/A'}
+                            </td>
+
+                            <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex gap-1">
+                                    <a
+                                        href={`/designs/edit/${d._id}`}
+                                        className="text-gray-400 hover:text-gray-600 p-2"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </a>
+
+                                    <button
+                                        onClick={() => onDelete(d._id)}
+                                        className="text-gray-400 hover:text-red-600 p-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            {designs.length === 0 && (
+                <div className="text-center py-12 text-gray-500 text-sm">
+                    No designs found
+                </div>
+            )}
+        </div>
+    );
+}
+
 
 export default DesignsList;
