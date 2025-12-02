@@ -6,6 +6,7 @@ exports.getAllExtras = async (req, res) => {
     const extras = await Extras.find();
     res.json(extras);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -16,6 +17,7 @@ exports.getExtraById = async (req, res) => {
     if (!extra) return res.status(404).json({ error: 'Not found' });
     res.json(extra);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid ID' });
   }
 };
@@ -26,6 +28,7 @@ exports.createExtra = async (req, res) => {
     const saved = await newExtra.save();
     res.status(201).json(saved);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid data' });
   }
 };
@@ -36,6 +39,7 @@ exports.updateExtra = async (req, res) => {
     if (!updated) return res.status(404).json({ error: 'Not found' });
     res.json(updated);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid data or ID' });
   }
 };
@@ -58,7 +62,7 @@ exports.deleteExtra = async (req, res) => {
     if (!deleted) return res.status(404).json({ error: 'Not found' });
     res.json({ message: 'Deleted' });
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.status(400).json({ error: 'Invalid ID' });
   }
 };

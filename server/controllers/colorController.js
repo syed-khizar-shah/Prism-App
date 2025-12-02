@@ -12,6 +12,7 @@ exports.createColor = async (req, res) => {
     await color.save();
     res.status(201).json(color);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ message: err.message });
   }
 };
@@ -22,6 +23,7 @@ exports.getColors = async (req, res) => {
     const colors = await Color.find();
     res.json(colors);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ message: err.message });
   }
 };
@@ -33,6 +35,7 @@ exports.getColorById = async (req, res) => {
     if (!color) return res.status(404).json({ message: 'Color not found' });
     res.json(color);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ message: err.message });
   }
 };
@@ -43,6 +46,7 @@ exports.updateColor = async (req, res) => {
     if (!color) return res.status(404).json({ message: 'Color not found' });
     res.json(color);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ message: err.message });
   }
 };
@@ -67,6 +71,7 @@ exports.deleteColor = async (req, res) => {
 
     res.json({ message: 'Color deleted' });
   } catch (err) {
+    console.error(err)
     res.status(500).json({ message: err.message });
   }
 };

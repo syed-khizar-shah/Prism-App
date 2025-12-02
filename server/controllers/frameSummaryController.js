@@ -8,8 +8,9 @@ exports.createFrameSummary = async (req, res) => {
     const frameSummary = new FrameSummary(req.body);
     await frameSummary.save();
     res.status(201).json(frameSummary);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(400).json({ error: err.message });
   }
 };
 
@@ -20,8 +21,9 @@ exports.getFrameSummaries = async (req, res) => {
   try {
     const summaries = await FrameSummary.find().sort({ sectionOrder: 1 });
     res.json(summaries);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -35,8 +37,9 @@ exports.getFrameSummaryById = async (req, res) => {
       return res.status(404).json({ error: 'FrameSummary not found' });
     }
     res.json(summary);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -54,8 +57,9 @@ exports.updateFrameSummary = async (req, res) => {
       return res.status(404).json({ error: 'FrameSummary not found' });
     }
     res.json(summary);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(400).json({ error: err.message });
   }
 };
 
@@ -69,8 +73,9 @@ exports.deleteFrameSummary = async (req, res) => {
       return res.status(404).json({ error: 'FrameSummary not found' });
     }
     res.json({ message: 'FrameSummary deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -86,8 +91,8 @@ exports.addField = async (req, res) => {
     summary.fields.push(req.body); // expects { name, type, required, isActive, order, options }
     await summary.save();
     res.json(summary);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
@@ -109,8 +114,9 @@ exports.updateField = async (req, res) => {
     Object.assign(field, req.body); // update only provided properties
     await summary.save();
     res.json(summary);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(400).json({ error: err.message });
   }
 };
 
@@ -126,7 +132,8 @@ exports.removeField = async (req, res) => {
     summary.fields.splice(req.params.fieldIndex, 1); // remove by index
     await summary.save();
     res.json(summary);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  } catch (err) {
+    console.error(err)
+    res.status(400).json({ error: err.message });
   }
 };

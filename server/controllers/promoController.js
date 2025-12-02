@@ -38,6 +38,7 @@ const getValidPromos = async (req, res) => {
 
     res.json(validPromos);
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: error.message });
   }
 };
@@ -51,6 +52,7 @@ const getPromoById = async (req, res) => {
     }
     res.json(promo);
   } catch (error) {
+        console.error(error)
     res.status(500).json({ message: error.message });
   }
 };
@@ -64,6 +66,7 @@ const updatePromo = async (req, res) => {
     }
     res.json(promo);
   } catch (error) {
+        console.error(error)
     res.status(400).json({ message: error.message });
   }
 };
@@ -77,6 +80,7 @@ const deletePromo = async (req, res) => {
     }
     res.json({ message: 'Promo deleted' });
   } catch (error) {
+        console.error(error)
     res.status(500).json({ message: error.message });
   }
 };

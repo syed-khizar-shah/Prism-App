@@ -7,6 +7,7 @@ exports.createAgeGroup = async (req, res) => {
     await ageGroup.save();
     res.status(201).json(ageGroup);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: err.message });
   }
 };
@@ -17,6 +18,7 @@ exports.getAllAgeGroups = async (req, res) => {
     const ageGroups = await AgeGroup.find();
     res.json(ageGroups);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: err.message });
   }
 };
@@ -28,6 +30,7 @@ exports.getAgeGroupById = async (req, res) => {
     if (!ageGroup) return res.status(404).json({ error: 'Not found' });
     res.json(ageGroup);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: err.message });
   }
 };
@@ -39,6 +42,7 @@ exports.updateAgeGroup = async (req, res) => {
     if (!ageGroup) return res.status(404).json({ error: 'Not found' });
     res.json(ageGroup);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: err.message });
   }
 };
@@ -50,6 +54,7 @@ exports.deleteAgeGroup = async (req, res) => {
     if (!ageGroup) return res.status(404).json({ error: 'Not found' });
     res.json({ message: 'Deleted successfully' });
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: err.message });
   }
 };

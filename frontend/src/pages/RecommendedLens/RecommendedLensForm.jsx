@@ -98,10 +98,10 @@ const RecommendedLensForm = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-medium text-gray-900">
-                        {id ? 'Edit Recommended Lens' : 'Create New Recommended Lens'}
+                            {id ? 'Edit Recommended Lens' : 'Create New Recommended Lens'}
                         </h2>
                         <p className="text-sm text-gray-500 mt-1">
-                        {id ? 'Modify the existing lens details' : 'Fill in the details to create a new recommended lens'}
+                            {id ? 'Modify the existing lens details' : 'Fill in the details to create a new recommended lens'}
                         </p>
                     </div>
                     <a
@@ -113,26 +113,24 @@ const RecommendedLensForm = () => {
                     </a>
                 </div>
             </div>
-            
+
             {submitStatus && (
-                <div className={`px-4 py-3 mb-6 rounded-md border-l-4 ${
-                    submitStatus.startsWith('Error') 
+                <div className={`px-4 py-3 mb-6 rounded-md border-l-4 ${submitStatus.startsWith('Error')
                         ? 'bg-red-50 border-red-400 text-red-700'
                         : 'bg-green-50 border-green-400 text-green-700'
-                }`}>
+                    }`}>
                     <p className="text-sm">{submitStatus}</p>
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Code <span className="text-red-500">*</span>
+                    <div className='lg:col-span-2'>
+                        <label className="text-sm font-medium text-gray-700 mb-2">
+                            Code <span className="text-red-500">*</span>                         <p className="text-xs text-gray-500 mb-1">
+                                Unique code helps distinguish between recommended lenses that have the same name but differ in type or price.
+                            </p>
                         </label>
-                        <p className="text-xs text-gray-500 mb-2">
-                            This unique code helps distinguish between recommended lenses that may have the same name but differ in type or price.
-                        </p>
                         <input
                             type="text"
                             name="code"
@@ -161,42 +159,6 @@ const RecommendedLensForm = () => {
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                     </div>
 
-                    <div className="lg:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <textarea
-                            name="description"
-                            value={lens.description}
-                            onChange={handleChange}
-                            placeholder="Brief description of the lens"
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors resize-none"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Optional: Provide additional details about this lens</p>
-                    </div>
-
-                    <div className="lg:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Image
-                        </label>
-                        
-                        {/* Show preview of current image */}
-                        {lens.image && (
-                            <div className="mb-4 bg-gray-50 rounded-lg p-4">
-                                <div className="relative inline-block">
-                                    <img
-                                        src={lens.image}
-                                        alt="Preview"
-                                        className="max-w-full h-auto max-h-64 rounded-md shadow-sm border border-gray-200"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        <ImageUploader onUpload={handleImageUpload} initialImage={lens.image} />
-                        {errors.image && <p className="text-red-600 text-sm mt-1">{errors.image}</p>}
-                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -218,6 +180,43 @@ const RecommendedLensForm = () => {
                         </div>
                         {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                     </div>
+
+                    <div className="lg:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Description
+                        </label>
+                        <textarea
+                            name="description"
+                            value={lens.description}
+                            onChange={handleChange}
+                            placeholder="Brief description of the lens"
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors resize-none"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Optional: Provide additional details about this lens</p>
+                    </div>
+
+                    <div className="lg:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Image
+                        </label>
+
+                        {/* Show preview of current image */}
+                        {lens.image && (
+                            <div className="mb-4 bg-gray-50 rounded-lg p-4">
+                                <div className="relative inline-block">
+                                    <img
+                                        src={lens.image}
+                                        alt="Preview"
+                                        className="max-w-full h-auto max-h-64 rounded-md shadow-sm border border-gray-200"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <ImageUploader onUpload={handleImageUpload} initialImage={lens.image} />
+                        {errors.image && <p className="text-red-600 text-sm mt-1">{errors.image}</p>}
+                    </div>
                 </div>
 
                 <div className="flex gap-3 pt-6 border-t border-gray-100">
@@ -233,7 +232,7 @@ const RecommendedLensForm = () => {
                         )}
                         {id ? 'Update' : 'Create'} Lens
                     </button>
-                    
+
                     <button
                         type="button"
                         onClick={handleCancel}

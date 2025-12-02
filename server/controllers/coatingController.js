@@ -5,6 +5,7 @@ exports.getAllCoatings = async (req, res) => {
     const coatings = await Coating.find();
     res.json(coatings);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -15,6 +16,7 @@ exports.getCoatingById = async (req, res) => {
     if (!coating) return res.status(404).json({ error: 'Not found' });
     res.json(coating);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid ID' });
   }
 };
@@ -25,6 +27,7 @@ exports.createCoating = async (req, res) => {
     const saved = await newCoating.save();
     res.status(201).json(saved);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid data' });
   }
 };
@@ -35,6 +38,7 @@ exports.updateCoating = async (req, res) => {
     if (!updated) return res.status(404).json({ error: 'Not found' });
     res.json(updated);
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid data or ID' });
   }
 };
@@ -45,6 +49,7 @@ exports.deleteCoating = async (req, res) => {
     if (!deleted) return res.status(404).json({ error: 'Not found' });
     res.json({ message: 'Deleted' });
   } catch (err) {
+    console.error(err)
     res.status(400).json({ error: 'Invalid ID' });
   }
 };

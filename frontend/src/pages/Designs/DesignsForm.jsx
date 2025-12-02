@@ -34,7 +34,7 @@ const DesignForm = () => {
     const [loadingError, setLoadingError] = useState(null)
 
     const fetchOptions = async () => {
-        const [lens, recommended, coatings, extras, colors] = await Promise.allSettled([
+        const [lens, recommended, coatings, extras, colors] = await Promise.all([
             axiosInstance.get(`/api/lenses`),
             axiosInstance.get(`/api/recommended-lenses`),
             axiosInstance.get(`/api/coatings`),
@@ -436,9 +436,6 @@ const DesignForm = () => {
             </div>
         )
     }
-    // Get the selected lens type name for the naming convention info
-    const selectedLensTypeName = lensList.find(lens => lens._id === design.lensType)?.name || '';
-
 
     return (
         <div className="p-8 mb-8">
@@ -606,7 +603,7 @@ const DesignForm = () => {
                                         </h3>
                                         <div className="mt-1 text-sm text-gray-600">
                                             Since no specific recommended lens is selected, this design will appear under every recommended lens option for the
-                                            <strong> {selectedLensTypeName} lens type.</strong>
+                                            <strong> Selected lens type.</strong>
                                         </div>
                                     </div>
                                 </div>

@@ -48,60 +48,60 @@ const orderSelectionSchema = new mongoose.Schema({
     required: true
   },
   name: String,
-  
+
   // Lens configuration (stored as names and prices, not references)
   ageGroup: {
     name: String,
     price: Number
   },
-  
+
   lensType: {
     name: String,
     price: Number
   },
-  
+
   lensSubtype: {
     name: String,
     price: Number
   },
-  
+
   powerMap: {
     min: Number,
     max: Number
   },
-  
+
   recommendedLens: {
     name: String,
     price: Number
   },
-  
+
   design: {
     name: String,
     price: Number,
     isVisible: Boolean
   },
-  
+
   coatings: {
     name: String,
     price: Number
   },
-  
+
   extras: {
     name: String,
     price: Number
   },
-  
+
   color: {
     name: String,
     code: String
   },
-  
+
   // Frame data (dynamic fields)
   frameData: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
   },
-  
+
   // Calculated price for this selection
   selectionPrice: {
     type: Number,
@@ -165,43 +165,43 @@ const orderSchema = new mongoose.Schema({
     unique: true,
     index: true
   },
-  
+
   // Customer information
   customer: {
     type: customerInfoSchema,
     required: true
   },
-  
+
   // Order details
   selections: {
     type: [orderSelectionSchema],
     required: true,
     validate: {
-      validator: function(selections) {
+      validator: function (selections) {
         return selections && selections.length > 0;
       },
       message: 'Order must have at least one selection'
     }
   },
-  
+
   promo: {
     type: orderPromoSchema,
     default: null,
     required: false
   },
-  
+
   // Pricing
   pricing: {
     type: orderPricingSchema,
     required: true
   },
-  
+
   // Payment information
   payment: {
     type: paymentInfoSchema,
     required: true
   },
-  
+
   // Order metadata
   status: {
     type: String,
@@ -210,25 +210,24 @@ const orderSchema = new mongoose.Schema({
     default: 'pending',
     index: true
   },
-  
+
   orderDate: {
     type: Date,
     required: true,
     default: Date.now,
     index: true
   },
-  
+
   // Optional fields
-  notes: String,
-  salesperson: String,
-  storeLocation: String,
-  
-  // Receipt/PDF information
-  receiptGenerated: {
-    type: Boolean,
-    default: false
+  notes: {
+    type: String,
   },
-  receiptUrl: String
+  salesperson: {
+    type: String,
+  },
+  storeLocation: {
+    type: String,
+  },
 }, {
   timestamps: true, // Adds createdAt and updatedAt automatically
   collection: 'orders'
@@ -242,7 +241,7 @@ orderSchema.index({ 'pricing.totalPrice': -1 });
 orderSchema.index({ createdAt: -1 });
 
 // Pre-save middleware to generate orderId if not provided
-orderSchema.pre('save', async function(next) {
+orderSchema.pre('save', async function (next) {
   // Always generate orderId if it doesn't exist
   if (!this.orderId || this.orderId.trim() === '') {
     try {
@@ -252,15 +251,15 @@ orderSchema.pre('save', async function(next) {
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const year = String(now.getFullYear()).slice(-2);
       const datePrefix = `${day}${month}${year}`;
-      
+
       // Find the highest order number for today
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      
+
       const todayOrders = await this.constructor.find({
         orderDate: { $gte: todayStart, $lt: todayEnd }
       }).sort({ orderId: -1 }).limit(1);
-      
+
       let orderNumber = 1;
       if (todayOrders.length > 0 && todayOrders[0].orderId) {
         // Extract the order number from existing order ID
@@ -272,7 +271,7 @@ orderSchema.pre('save', async function(next) {
           }
         }
       }
-      
+
       // Format: DDMMYY + 3-digit order number (e.g., 24825001)
       this.orderId = `${datePrefix}${String(orderNumber).padStart(3, '0')}`;
     } catch (error) {
@@ -286,20 +285,20 @@ orderSchema.pre('save', async function(next) {
 });
 
 // Static method to generate order ID for a specific date
-orderSchema.statics.generateOrderId = async function(date = new Date()) {
+orderSchema.statics.generateOrderId = async function (date = new Date()) {
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = String(date.getFullYear()).slice(-2);
   const datePrefix = `${day}${month}${year}`;
-  
+
   // Find the highest order number for the specified date
   const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const dateEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-  
+
   const orders = await this.find({
     orderDate: { $gte: dateStart, $lt: dateEnd }
   }).sort({ orderId: -1 }).limit(1);
-  
+
   let orderNumber = 1;
   if (orders.length > 0 && orders[0].orderId) {
     const existingOrderId = orders[0].orderId;
@@ -310,42 +309,42 @@ orderSchema.statics.generateOrderId = async function(date = new Date()) {
       }
     }
   }
-  
+
   return `${datePrefix}${String(orderNumber).padStart(3, '0')}`;
 };
 
 // Static method to validate order ID format
-orderSchema.statics.isValidOrderId = function(orderId) {
+orderSchema.statics.isValidOrderId = function (orderId) {
   if (!orderId || typeof orderId !== 'string') return false;
-  
+
   // Check if it matches DDMMYY + 3 digits format
   const regex = /^\d{8}$/;
   if (!regex.test(orderId)) return false;
-  
+
   // Extract date parts
   const day = parseInt(orderId.slice(0, 2));
   const month = parseInt(orderId.slice(2, 4));
   const year = parseInt(orderId.slice(4, 6));
-  
+
   // Basic date validation
   if (day < 1 || day > 31 || month < 1 || month > 12 || year < 0 || year > 99) {
     return false;
   }
-  
+
   return true;
 };
 
 // Static method to extract date from order ID
-orderSchema.statics.getDateFromOrderId = function(orderId) {
+orderSchema.statics.getDateFromOrderId = function (orderId) {
   if (!this.isValidOrderId(orderId)) return null;
-  
+
   const day = parseInt(orderId.slice(0, 2));
   const month = parseInt(orderId.slice(2, 4));
   const year = parseInt(orderId.slice(4, 6));
-  
+
   // Assume years 00-99 are 2000-2099
   const fullYear = year < 50 ? 2000 + year : 1900 + year;
-  
+
   return new Date(fullYear, month - 1, day);
 };
 

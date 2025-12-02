@@ -106,15 +106,15 @@ export default function OrderDetail() {
               </p>
             </div>
             <div className="flex gap-3">
-              <button 
-                onClick={() => navigate(-1)} 
+              <button
+                onClick={() => navigate(-1)}
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Orders
               </button>
-              <button 
-                onClick={handleReceipt} 
+              <button
+                onClick={handleReceipt}
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
               >
                 <FileText className="w-4 h-4" />
@@ -145,7 +145,7 @@ export default function OrderDetail() {
               </div>
               <h3 className="text-lg font-medium text-gray-900">Order Status</h3>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -154,7 +154,7 @@ export default function OrderDetail() {
                   onChange={(e) => handleStatusChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                 >
-                  {['pending','confirmed','processing','completed','cancelled','refunded'].map(s => (
+                  {['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'refunded'].map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -167,7 +167,7 @@ export default function OrderDetail() {
                   </div>
                   <h4 className="text-sm font-medium text-gray-900">Payment Information</h4>
                 </div>
-                
+
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Method</label>
@@ -213,7 +213,7 @@ export default function OrderDetail() {
               </div>
               <h3 className="text-lg font-medium text-gray-900">Customer Details</h3>
             </div>
-            
+
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
@@ -253,7 +253,7 @@ export default function OrderDetail() {
               </div>
               <h3 className="text-lg font-medium text-gray-900">Pricing Details</h3>
             </div>
-            
+
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Subtotal</label>
@@ -324,6 +324,23 @@ export default function OrderDetail() {
           </div>
         </div>
 
+        <div className="mt-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-8 w-8 bg-orange-100 rounded-lg flex items-center justify-center">
+              <Package className="w-4 h-4 text-orange-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Notes</h3>
+          </div>
+          <div className="bg-gray-50 text-left border border-gray-200 rounded-lg py-4 px-8 text-gray-700 min-h-[60px]">
+            {order.notes ? (
+              <p className="whitespace-pre-line">{order.notes}</p>
+            ) : (
+              <span className="text-gray-400 italic">No notes added.</span>
+            )}
+          </div>
+        </div>
+
+
         {/* Selections Section */}
         <div className="mt-6">
           <div className="flex items-center gap-3 mb-4">
@@ -332,7 +349,7 @@ export default function OrderDetail() {
             </div>
             <h3 className="text-lg font-medium text-gray-900">Order Selections</h3>
           </div>
-          <SelectionsTable order={order}/>
+          <SelectionsTable order={order} />
         </div>
       </div>
     </div>
@@ -364,8 +381,8 @@ const SelectionTable = ({ data }) => {
     { label: "Lens Subtype", value: data.lensSubtype?.name, price: data.lensSubtype?.price },
     {
       label: "Power Range",
-      value: data.powerMap?.min != null && data.powerMap?.max != null 
-        ? `${data.powerMap.min} to ${data.powerMap.max}` 
+      value: data.powerMap?.min != null && data.powerMap?.max != null
+        ? `${data.powerMap.min} to ${data.powerMap.max}`
         : null,
       price: null
     },
@@ -398,13 +415,13 @@ const SelectionTable = ({ data }) => {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-xl p-6 border border-gray-200">
       <h2 className="text-xl font-semibold mb-4">{data.name || "Selection"}</h2>
 
       <table className="w-full text-left table-auto border-collapse">
         <thead>
-          <tr className="border-b border-gray-300">
-            <th className="py-2 px-3 text-gray-500">Item</th>
+          <tr className="border border-gray-300">
+            <th className="py-2 px-3 text-gray-500 ">Item</th>
             <th className="py-2 px-3 text-gray-500">Value</th>
             <th className="py-2 px-3 text-gray-500">Price (£)</th>
           </tr>
@@ -415,7 +432,7 @@ const SelectionTable = ({ data }) => {
             const textClass = isMissing ? "text-gray-400" : "text-gray-900";
 
             return (
-              <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : ""}>
+              <tr key={idx} className={"bg-gray-50 border border-gray-300"}>
                 <td className={`py-2 px-3 ${isMissing ? "text-gray-400" : "text-gray-700"}`}>
                   {row.label}
                 </td>

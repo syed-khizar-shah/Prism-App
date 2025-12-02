@@ -14,6 +14,7 @@ exports.getAllDesigns = async (req, res) => {
       });
     res.json(designs);
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -33,7 +34,7 @@ exports.getDesignById = async (req, res) => {
     if (!design) return res.status(404).json({ error: 'Design not found' });
     res.json(design);
   } catch (err) {
-    console.error(err);
+    console.error(err)
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -81,7 +82,7 @@ exports.getDesignByLensPair = async (req, res) => {
 
     res.json(designs);
   } catch (err) {
-    console.log(err);
+    console.error(err)
     res.status(500).json({ error: 'Server Error' });
   }
 };
@@ -143,7 +144,7 @@ exports.createDesign = async (req, res) => {
       
     res.status(201).json(populatedDesign);
   } catch (err) {
-    console.log(err);
+    console.error(err)
     res.status(400).json({ error: err.message });
   }
 };
@@ -203,7 +204,7 @@ exports.updateDesign = async (req, res) => {
 
     res.json(design);
   } catch (err) {
-    console.log(err);
+    console.error(err)
     res.status(400).json({ error: err.message });
   }
 };
@@ -214,6 +215,7 @@ exports.deleteDesign = async (req, res) => {
     if (!design) return res.status(404).json({ error: 'Design not found' });
     res.json({ message: 'Design deleted successfully' });
   } catch (err) {
+    console.error(err)
     res.status(500).json({ error: 'Server Error' });
   }
 };
