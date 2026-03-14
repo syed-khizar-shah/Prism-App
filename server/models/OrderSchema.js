@@ -1,5 +1,22 @@
 const mongoose = require('mongoose');
 
+// Schema for Sight Test
+const orderSightTestSchema = new mongoose.Schema({
+  hadTest: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  category: String, // e.g., "Private" or "NHS"
+  tier: String,     // e.g., "Enhanced" or "Ultimate"
+  price: {
+    type: Number,
+    default: 0,
+    min: 0
+  }
+}, { _id: false });
+
+
 // Schema for customer information
 const customerInfoSchema = new mongoose.Schema({
   name: {
@@ -20,7 +37,8 @@ const customerInfoSchema = new mongoose.Schema({
     street: String,
     city: String,
     postalCode: String,
-    country: String
+    country: String,
+    address: String,
   }
 }, { _id: false });
 
@@ -134,10 +152,24 @@ const orderPricingSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  sightTestFee: { // Explicitly stored for easy reporting
+    type: Number,
+    default: 0
+  },
   discount: {
     type: Number,
     required: true,
     min: 0
+  },
+  discounts: {
+    promo: {
+      type: Number,
+      min: 0
+    },
+    nhsgos3: {
+      type: Number,
+      min: 0
+    }
   },
   totalPrice: {
     type: Number,
@@ -170,6 +202,12 @@ const orderSchema = new mongoose.Schema({
   customer: {
     type: customerInfoSchema,
     required: true
+  },
+
+  sightTest: {
+    type: orderSightTestSchema,
+    required: true,
+    default: () => ({ hadTest: false, price: 0 })
   },
 
   // Order details

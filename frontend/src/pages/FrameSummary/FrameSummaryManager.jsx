@@ -94,6 +94,8 @@ const FrameSummaryManager = () => {
       const data = await FrameSummaryAPI.getFrameSummary();
       console.log({ data })
 
+      console.log({id: data._id})
+
       setSummary(data);
       setFields([...data.fields]);
       setOriginalFields([...data.fields]); // Store original state

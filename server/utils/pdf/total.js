@@ -1,4 +1,4 @@
-const {formatCurrency} = require("./helpers")
+const { formatCurrency } = require("./helpers")
 
 /**
  * Build totals section for receipt
@@ -6,7 +6,7 @@ const {formatCurrency} = require("./helpers")
  * @returns {Object} Totals section for pdfmake
  */
 module.exports.buildOrderTotals = (pricing) => {
-    console.log({pricing})
+    console.log({ pricing })
     if (!pricing) {
         return {};
     }
@@ -15,6 +15,8 @@ module.exports.buildOrderTotals = (pricing) => {
     const discount = pricing.discount;
     const tax = pricing.tax;
     const shipping = pricing.shipping;
+    const nhsgos3 = pricing.discounts?.nhsgos3 || 0;
+    const promo = pricing.discounts?.promo || 0;
     const totalPrice = pricing.totalPrice;
 
     const rows = [];
@@ -22,30 +24,44 @@ module.exports.buildOrderTotals = (pricing) => {
     // Subtotal
     rows.push([
         { text: 'Subtotal', fontSize: 9, alignment: 'right' },
-        { text: formatCurrency(subtotal), fontSize: 9, alignment: 'right' }
+        { text: formatCurrency(subtotal), fontSize: 9, }
     ]);
 
     // Discount (only show if > 0)
-    if (discount > 0) {
-        rows.push([
-            { text: 'Discount', fontSize: 9, alignment: 'right', color: '#28a745' },
-            { text: '-' + formatCurrency(discount), fontSize: 9, alignment: 'right', color: '#28a745' }
-        ]);
-    }
+    // if (discount > 0) {
+    //     rows.push([
+    //         { text: 'Discount', fontSize: 9, alignment: 'right', color: '#28a745' },
+    //         { text: '-' + formatCurrency(discount), fontSize: 9, color: '#28a745' }
+    //     ]);
+    // }
 
     // Tax (only show if > 0)
-    if (tax > 0) {
-        rows.push([
-            { text: 'Tax', fontSize: 9, alignment: 'right' },
-            { text: formatCurrency(tax), fontSize: 9, alignment: 'right' }
-        ]);
-    }
+    // if (tax > 0) {
+    //     rows.push([
+    //         { text: 'Tax', fontSize: 9, alignment: 'right' },
+    //         { text: formatCurrency(tax), fontSize: 9, }
+    //     ]);
+    // }
 
     // Shipping (only show if > 0)
-    if (shipping > 0) {
+    // if (shipping > 0) {
+    //     rows.push([
+    //         { text: 'Shipping', fontSize: 9, alignment: 'right' },
+    //         { text: formatCurrency(shipping), fontSize: 9 }
+    //     ]);
+    // }
+    if (promo) {
+
         rows.push([
-            { text: 'Shipping', fontSize: 9, alignment: 'right' },
-            { text: formatCurrency(shipping), fontSize: 9, alignment: 'right' }
+            { text: 'Promotion', fontSize: 9, alignment: 'right' },
+            { text: '-' + formatCurrency(promo), fontSize: 9 }
+        ]);
+    }
+    if (nhsgos3) {
+
+        rows.push([
+            { text: 'NHS voucher', fontSize: 9, alignment: 'right' },
+            { text: '-' + formatCurrency(nhsgos3), fontSize: 9 }
         ]);
     }
 

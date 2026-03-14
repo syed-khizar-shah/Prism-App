@@ -4,6 +4,7 @@ const { buildHeader } = require("./header");
 const { buildCustomerInfo } = require("./customer");
 const { buildOrderItems } = require("./order-table");
 const { buildOrderTotals } = require("./total");
+const { buildSightTests } = require("./sight-test");
 
 
 const fonts = {
@@ -24,6 +25,7 @@ function generateReceiptBuffer(order) {
             content: [
                 buildHeader(order),
                 buildCustomerInfo(order.customer),
+                // buildSightTests(order.sightTest),
                 buildOrderItems(order),
                 buildOrderTotals(order.pricing)
             ]

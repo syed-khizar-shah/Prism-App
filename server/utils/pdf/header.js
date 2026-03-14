@@ -19,25 +19,25 @@ module.exports.buildHeader = (order) => {
                                         width: 100,
                                         valign: "center"
                                     },
-                                    {
-                                        stack: [
-                                            {
-                                                text: "2020 OPTIX",
-                                                fontSize: 28,
-                                                bold: true,
-                                                color: "#000"
-                                            },
-                                            {
-                                                text: "Professional Eyewear Solutions",
-                                                fontSize: 12,
-                                                color: "#111",
-                                                margin: [0, 4, 0, 0]
-                                            }
-                                        ],
-                                        margin: [16, 0, 0, 0],
-                                        valign: "center"
+                                    // {
+                                    //     stack: [
+                                    //         {
+                                    //             text: "2020 OPTIX",
+                                    //             fontSize: 28,
+                                    //             bold: true,
+                                    //             color: "#000"
+                                    //         },
+                                    //         {
+                                    //             text: "Professional Eyewear Solutions",
+                                    //             fontSize: 12,
+                                    //             color: "#111",
+                                    //             margin: [0, 4, 0, 0]
+                                    //         }
+                                    //     ],
+                                    //     margin: [16, 0, 0, 0],
+                                    //     valign: "center"
 
-                                    }
+                                    // }
                                 ],
                                 columnGap: 8,
                                 valign: "center"
@@ -71,14 +71,14 @@ module.exports.buildHeader = (order) => {
                                 columnGap: 5,
                                 margin: [0, 0, 0, 3]
                             },
-                            {
-                                columns: [
-                                    { text: "Time:", fontSize: 9, bold: true, width: 100 },
-                                    { text: `${new Date(order.orderDate).toLocaleTimeString()}`, fontSize: 9, width: '*', alignment: "right" }
-                                ],
-                                columnGap: 5,
-                                margin: [0, 0, 0, 0]
-                            }
+                            // {
+                            //     columns: [
+                            //         { text: "Time:", fontSize: 9, bold: true, width: 100 },
+                            //         { text: `${new Date(order.orderDate).toLocaleTimeString()}`, fontSize: 9, width: '*', alignment: "right" }
+                            //     ],
+                            //     columnGap: 5,
+                            //     margin: [0, 0, 0, 0]
+                            // }
                         ],
                         width: 'auto',
                         alignment: "right",

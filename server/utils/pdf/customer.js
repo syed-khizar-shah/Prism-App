@@ -34,6 +34,14 @@ module.exports.buildCustomerInfo = (customer) => {
                                     { text: customer.phone? `${customer.phone}` : "_", fontSize: 9, width: '*' }
                                 ],
                                 columnGap: 10,
+                                margin: [0, 0, 0, 4]
+                            },
+                            {
+                                columns: [
+                                    { text: "Address:", fontSize: 9, bold: true, width: 80 },
+                                    { text: customer.address? `${customer.address.address}` : "_", fontSize: 9, width: '*' }
+                                ],
+                                columnGap: 10,
                                 margin: [0, 0, 0, 0]
                             }
                         ],

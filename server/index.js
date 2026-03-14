@@ -20,6 +20,7 @@ const frameSummaryRoutes = require('./routes/frameSummaryRoutes')
 const promosRoutes = require('./routes/promoRoutes')
 const orderRoutes = require('./routes/orderRoutes')
 const userRoutes = require('./routes/user');
+const sightTestRoutes = require('./routes/sightTestRoutes');
 
 
 
@@ -60,6 +61,7 @@ app.use('/api/designs',designRoutes)
 app.use('/api/frame-summary',frameSummaryRoutes)
 app.use('/api/promos',promosRoutes)
 app.use('/api/orders', orderRoutes)
+app.use('/api/sight-tests',sightTestRoutes);
 
 
 

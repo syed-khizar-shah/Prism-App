@@ -24,6 +24,7 @@ export default function Navbar({ currentPath = "/" }) {
     { path: "/recommended-lenses", label: "Recommended Lenses" },
     { path: "/frame-summary-manager", label: "Frame Summary" },
     { path: "/promo-manager", label: "Promos" },
+    { path: "/sight-tests", label: "Sight Tests" },
   ];
 
   const isActivePath = (itemPath) =>

@@ -27,6 +27,7 @@ import GuestRoute from './components/auth/guest-route';
 import Login from "./pages/auth/login"
 import Register from "./pages/auth/register"
 import ErrorPage from "./pages/error-page"
+import SightTestPage from './pages/SightTest/SightTestPage';
 
 
 
@@ -241,6 +242,15 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <OrderDetail />
+          </ProtectedRoute>
+
+        )
+      },
+      {
+        path: '/sight-tests',
+        element: (
+          <ProtectedRoute>
+            <SightTestPage />
           </ProtectedRoute>
 
         )

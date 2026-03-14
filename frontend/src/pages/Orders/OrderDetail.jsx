@@ -242,6 +242,15 @@ export default function OrderDetail() {
                   onChange={(e) => setOrder({ ...order, customer: { ...order.customer, phone: e.target.value } })}
                 />
               </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Address</label>
+                <input
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                  value={order.customer?.address.address || ''}
+                  disabled
+                  onChange={(e) => setOrder({ ...order, customer: { ...order.customer, address: { ...order.customer.address, address: e.target.value } } })}
+                />
+              </div>
             </div>
           </div>
 
@@ -269,6 +278,19 @@ export default function OrderDetail() {
                 </div>
               </div>
               <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Sight Test</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
+                  <input
+                    type="number"
+                    className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                    value={order.pricing?.sightTestFee ?? ''}
+                    disabled
+                    onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, sightTestFee: Number(e.target.value) } })}
+                  />
+                </div>
+              </div>
+              <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Discount</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
@@ -280,6 +302,40 @@ export default function OrderDetail() {
                     onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, discount: Number(e.target.value) } })}
                   />
                 </div>
+              </div>
+              <div className='border border-gray-200 p-2 rounded-md space-y-2'>
+                <label className="block text-xs font-medium text-gray-800 mb-1">Discounts</label>
+                <div className='flex gap-2 align-middle'>
+                  <div className='my-auto text-xs font-medium text-gray-800 w-1/4'>
+                    Promos
+                  </div>
+                  <div className="relative w-3/4">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
+                    <input
+                      type="number"
+                      className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                      value={order.pricing?.discounts?.promo ?? ''}
+                      disabled
+                      onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, discount: Number(e.target.value) } })}
+                    />
+                  </div>
+                </div>
+                <div className='flex gap-2 align-middle'>
+                  <div className='my-auto text-xs font-medium text-gray-800 w-1/4'>
+                    NHS Gos3
+                  </div>
+                  <div className="relative w-3/4">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
+                    <input
+                      type="number"
+                      className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                      value={order.pricing?.discounts?.nhsgos3 ?? ''}
+                      disabled
+                      onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, discount: Number(e.target.value) } })}
+                    />
+                  </div>
+                </div>
+
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Tax</label>
