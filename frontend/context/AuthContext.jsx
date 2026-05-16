@@ -6,30 +6,40 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    checkAuth();
-  }, [localStorage.getItem('token')]);
+    let cancelled = false;
 
-  const checkAuth = async () => {
-    try {
-      const token = localStorage.getItem('token');
+    const checkAuth = async () => {
       if (!token) {
+        setUser(null);
         setLoading(false);
         return;
       }
 
-      const { data } = await axios.get('/api/user/verify');
-      setUser(data.user);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const { data } = await axios.get('/api/user/verify');
+        if (!cancelled) setUser(data.user);
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('token');
+        if (!cancelled) {
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    checkAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const login = async (email, password) => {
     try {
@@ -42,6 +52,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem('token', data.token);
       setUser(data.user);
+      setToken(data.token);
       return data;
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed');
@@ -56,6 +67,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem('token', data.token);
       setUser(data.user);
+      setToken(data.token);
       return data;
     } catch (error) {
       setError(error.response?.data?.error || 'Registration failed');
@@ -66,6 +78,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    setToken(null);
   };
 
   const updateProfile = async (userData) => {
