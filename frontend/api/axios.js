@@ -38,11 +38,19 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 errors (unauthorized)
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    // Handle 401 errors (expired/invalid session) — not failed login/register
+    const requestUrl = originalRequest?.url || '';
+    const isAuthRequest =
+      requestUrl.includes('/login') || requestUrl.includes('/register');
+    const isOnLoginPage = window.location.pathname === '/login';
 
-      // Clear token and redirect to login if refresh token isn't implemented
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthRequest &&
+      !isOnLoginPage
+    ) {
+      originalRequest._retry = true;
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

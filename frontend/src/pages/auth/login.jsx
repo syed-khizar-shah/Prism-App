@@ -25,7 +25,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      setLocalError(error?.response?.data?.message || "Something went wrong");
+      setLocalError(error?.response?.data?.error || "Something went wrong");
     }
   };
 
