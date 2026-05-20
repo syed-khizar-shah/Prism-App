@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, FileText, User, CreditCard, Package, Calendar, DollarSign, Check, X } from 'lucide-react';
 import OrdersAPI from './OrdersAPI';
 import axios from 'axios';
+import { PRISM_URL } from '../../../constants/urls';
 
-const prismURL = import.meta.env.VITE_API_PRISM_URL;
 
 export default function OrderDetail() {
   const { id } = useParams();
@@ -19,8 +19,6 @@ export default function OrderDetail() {
   const [results, setResults] = useState([]);
   const [prismLoading, setPrismLoading] = useState(false);
   const [isSelectingPatient, setIsSelectingPatient] = useState(false);
-
-
 
   const fetchOrder = async () => {
     try {
@@ -52,7 +50,7 @@ export default function OrderDetail() {
         setPrismLoading(true);
 
         const res = await axios.get(
-          `${prismURL}/api/patient/search-lite?value=${search}`
+          `${PRISM_URL}/api/patient/search-lite?value=${search}`
         );
         console.log({ res })
 
@@ -76,7 +74,7 @@ export default function OrderDetail() {
     const loadSelectedPatient = async () => {
       try {
         const res = await axios.get(
-          `${prismURL}/api/patient/${order.customer.prismId}`
+          `${PRISM_URL}/api/patient/${order.customer.prismId}`
         );
 
         const match = res.data;

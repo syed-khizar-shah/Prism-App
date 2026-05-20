@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../api/axios';
+import { API_URL } from '../constants/urls';
 
 const AuthContext = createContext({});
 
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const { data } = await axios.get('/api/user/verify');
+        const { data } = await axios.get(`${API_URL}/api/user/verify`);
         if (!cancelled) setUser(data.user);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const { data } = await axios.post('/api/user/login', {
+      const { data } = await axios.post(`${API_URL}/api/user/login`, {
         email,
         password
       });
@@ -63,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const { data } = await axios.post('/api/user/register', userData);
+      const { data } = await axios.post(`${API_URL}/api/user/register`, userData);
 
       localStorage.setItem('token', data.token);
       setUser(data.user);
@@ -83,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (userData) => {
     try {
-      const { data } = await axios.put('/api/user/profile', userData);
+      const { data } = await axios.put(`${API_URL}/api/user/profile`, userData);
       setUser(data.user);
       return data;
     } catch (error) {
