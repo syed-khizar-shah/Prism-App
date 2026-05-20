@@ -38,9 +38,11 @@ const ReportConfig = () => {
     setError(null);
     try {
       const res = await axiosInstance.get('/api/report-config');
+      console.log({res});
       console.log({d:res.data.data.sections});
       setSections(res.data.data.sections);
     } catch (err) {
+      console.log({err})
       setError(err.response?.data?.message || 'Failed to load report config');
     } finally {
       setLoading(false);
