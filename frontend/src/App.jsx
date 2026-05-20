@@ -28,6 +28,7 @@ import Login from "./pages/auth/login"
 import Register from "./pages/auth/register"
 import ErrorPage from "./pages/error-page"
 import SightTestPage from './pages/SightTest/SightTestPage';
+import ReportConfig from './pages/reportConfig/reportConfigPage';
 
 
 
@@ -251,6 +252,15 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <SightTestPage />
+          </ProtectedRoute>
+
+        )
+      },
+      {
+        path: '/report-config',
+        element: (
+          <ProtectedRoute>
+            <ReportConfig />
           </ProtectedRoute>
 
         )

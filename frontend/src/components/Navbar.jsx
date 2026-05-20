@@ -25,6 +25,8 @@ export default function Navbar({ currentPath = "/" }) {
     { path: "/frame-summary-manager", label: "Frame Summary" },
     { path: "/promo-manager", label: "Promos" },
     { path: "/sight-tests", label: "Sight Tests" },
+    { path: "/report-config", label: "Report Config" },
+
   ];
 
   const isActivePath = (itemPath) =>

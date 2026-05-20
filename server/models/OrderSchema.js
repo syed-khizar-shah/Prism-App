@@ -21,8 +21,8 @@ const orderSightTestSchema = new mongoose.Schema({
 const customerInfoSchema = new mongoose.Schema({
   prismId:{
     type: String,
-    required: true,
     trim: true,
+    index: true,
   },
   name: {
     type: String,

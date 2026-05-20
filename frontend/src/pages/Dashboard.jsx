@@ -14,6 +14,10 @@ export default function Dashboard() {
     { label: "Recommended Lenses", description: "Configure recommendations", path: "/recommended-lenses" },
     { label: "Frame Summary", description: "Summary of frames", path: "/frame-summary-manager" },
     { label: "Promos", description: "Manage promotions", path: "/promo-manager" },
+    { label: "Sight Test", description: "Manage Sight Tests", path: "/sight-tests" },
+    { label: "Report Config", description: "Manage Order Reports", path: "/report-config" },
+
+
   ];
 
   return (

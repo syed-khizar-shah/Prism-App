@@ -1,6 +1,9 @@
 const Order = require('../models/OrderSchema');
+const ReportConfig = require('../models/reportConfig');
+
 const { generateReceiptBuffer } = require('../utils/pdf/pdf');
 const pdfService = require('../services/pdfService');
+const { getConfig } = require('./reportConfigController');
 
 // Create a new order
 // const createOrder = async (req, res) => {
@@ -202,7 +205,7 @@ const createOrder = async (req, res) => {
 
     // Save the order
     const savedOrder = await order.save();
-    
+
     res.status(201).json({
       success: true,
       order: savedOrder,
@@ -350,45 +353,74 @@ const getOrderByOrderId = async (req, res) => {
   }
 };
 
+const getOrderByPrismId = async (req, res) => {
+  try {
+    const { prismId } = req.params;
+
+    const order = await Order.findOne({
+      "customer.prismId": prismId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: "Order not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch order",
+      details: error.message,
+    });
+  }
+};
+
 // Update an order
-// const updateOrder = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updateData = req.body;
+const updateOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
 
-//     // Remove fields that shouldn't be updated directly
-//     delete updateData._id;
-//     delete updateData.orderId;
-//     delete updateData.createdAt;
+    // // Remove fields that shouldn't be updated directly
+    // delete updateData._id;
+    // delete updateData.orderId;
+    // delete updateData.createdAt;
 
-//     const order = await Order.findByIdAndUpdate(
-//       id,
-//       { ...updateData, updatedAt: new Date() },
-//       { new: true, runValidators: true }
-//     );
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { ...updateData, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
 
-//     if (!order) {
-//       return res.status(404).json({
-//         success: false,
-//         error: 'Order not found'
-//       });
-//     }
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found'
+      });
+    }
 
-//     res.json({
-//       success: true,
-//       order,
-//       message: 'Order updated successfully'
-//     });
+    res.json({
+      success: true,
+      order,
+      message: 'Order updated successfully'
+    });
 
-//   } catch (error) {
-//     console.error('Error updating order:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Failed to update order',
-//       details: error.message
-//     });
-//   }
-// };
+  } catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update order',
+      details: error.message
+    });
+  }
+};
 
 // Delete an order
 const deleteOrder = async (req, res) => {
@@ -512,34 +544,25 @@ const generateReceipt = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id);
+    const [order, config] = await Promise.all([
+      Order.findById(id),
+      ReportConfig.getGlobalConfig(),
+    ]);
 
     if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'Order not found'
-      });
+      return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    // Generate PDF in memory
-    // const pdfBuffer = await pdfService.generateReceiptBuffer(order);
-    const pdfBuffer = await generateReceiptBuffer(order);
+    const pdfBuffer = await generateReceiptBuffer(order, config.sections);
 
-    // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="receipt-${order.orderId}.pdf"`);
     res.setHeader('Content-Length', pdfBuffer.length);
-
-    // Send the PDF buffer directly to the client
     res.send(pdfBuffer);
 
   } catch (error) {
     console.error('Error generating receipt:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to generate receipt',
-      details: error.message
-    });
+    res.status(500).json({ success: false, error: 'Failed to generate receipt', details: error.message });
   }
 };
 
@@ -550,7 +573,9 @@ module.exports = {
   getOrders,
   getOrderById,
   getOrderByOrderId,
+  getOrderByPrismId,
   deleteOrder,
+  updateOrder,
   updateOrderStatus,
   searchOrders,
   generateReceipt

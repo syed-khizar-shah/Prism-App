@@ -9,7 +9,8 @@ const {
   deleteOrder,
   updateOrderStatus,
   searchOrders,
-  generateReceipt
+  generateReceipt,
+  getOrderByPrismId
 } = require('../controllers/orderController');
 
 // Create a new order
@@ -21,11 +22,13 @@ router.get('/', getOrders);
 // Get a single order by ID
 router.get('/:id', getOrderById);
 
+router.get('/by-prism-id/:prismId',getOrderByPrismId)
+
 // Get order by orderId
 router.get('/by-order-id/:orderId', getOrderByOrderId);
 
 // Update an order
-// router.put('/:id', updateOrder);
+router.put('/:id', updateOrder);
 
 // Delete an order
 router.delete('/:id', deleteOrder);

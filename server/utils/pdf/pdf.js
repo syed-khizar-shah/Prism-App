@@ -5,20 +5,23 @@ const { buildCustomerInfo } = require("./customer");
 const { buildOrderItems } = require("./order-table");
 const { buildOrderTotals } = require("./total");
 const { buildSightTests } = require("./sight-test");
+const { getConfig } = require("../../controllers/reportConfigController");
 
 
 const fonts = {
     Roboto: {
-        normal: path.join(__dirname, "..","..", "assets", "fonts", "Roboto-Regular.ttf"),
-        bold: path.join(__dirname, "..","..", "assets", "fonts", "Roboto-Medium.ttf"),
-        italics: path.join(__dirname, "..","..", "assets", "fonts", "Roboto-Italic.ttf"),
-        bolditalics: path.join(__dirname, "..","..", "assets", "fonts", "Roboto-MediumItalic.ttf")
+        normal: path.join(__dirname, "..", "..", "assets", "fonts", "Roboto-Regular.ttf"),
+        bold: path.join(__dirname, "..", "..", "assets", "fonts", "Roboto-Medium.ttf"),
+        italics: path.join(__dirname, "..", "..", "assets", "fonts", "Roboto-Italic.ttf"),
+        bolditalics: path.join(__dirname, "..", "..", "assets", "fonts", "Roboto-MediumItalic.ttf")
     }
 };
 
 const printer = new PdfPrinter(fonts);
 
-function generateReceiptBuffer(order) {
+function generateReceiptBuffer(order,sections) {
+    console.log({sections});
+
     return new Promise((resolve, reject) => {
         const docDefinition = {
             pageMargins: [40, 50, 40, 40],
@@ -26,7 +29,7 @@ function generateReceiptBuffer(order) {
                 buildHeader(order),
                 buildCustomerInfo(order.customer),
                 // buildSightTests(order.sightTest),
-                buildOrderItems(order),
+                buildOrderItems(order,sections.items),
                 buildOrderTotals(order.pricing)
             ]
         };

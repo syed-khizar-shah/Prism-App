@@ -2,14 +2,25 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, FileText, User, CreditCard, Package, Calendar, DollarSign, Check, X } from 'lucide-react';
 import OrdersAPI from './OrdersAPI';
+import axios from 'axios';
+
+const prismURL = import.meta.env.VITE_API_PRISM_URL;
 
 export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const [search, setSearch] = useState('');
+  const [selectedPatientLabel, setSelectedPatientLabel] = useState('');
+  const [results, setResults] = useState([]);
+  const [prismLoading, setPrismLoading] = useState(false);
+  const [isSelectingPatient, setIsSelectingPatient] = useState(false);
+
+
 
   const fetchOrder = async () => {
     try {
@@ -29,18 +40,68 @@ export default function OrderDetail() {
     fetchOrder();
   }, [id]);
 
-  // const handleSave = async () => {
-  //   try {
-  //     setSaving(true);
-  //     await OrdersAPI.updateOrder(id, order);
-  //     await fetchOrder();
-  //     alert('Order updated');
-  //   } catch (e) {
-  //     alert(e.message || 'Failed to update order');
-  //   } finally {
-  //     setSaving(false);
-  //   }
-  // };
+
+  useEffect(() => {
+    const delay = setTimeout(async () => {
+      if (!isSelectingPatient || !search.trim()) {
+        setResults([]);
+        return;
+      }
+
+      try {
+        setPrismLoading(true);
+
+        const res = await axios.get(
+          `${prismURL}/api/patient/search-lite?value=${search}`
+        );
+        console.log({ res })
+
+        setResults(res.data || []);
+      } catch (error) {
+        console.error(error);
+        setResults([]);
+      } finally {
+        setPrismLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [search, isSelectingPatient]);
+
+  useEffect(() => {
+    console.log("ORDER:", order);
+    console.log("PRISM ID:", order?.customer?.prismId);
+    if (!order?.customer?.prismId) return;
+
+    const loadSelectedPatient = async () => {
+      try {
+        const res = await axios.get(
+          `${prismURL}/api/patient/${order.customer.prismId}`
+        );
+
+        const match = res.data;
+        setSelectedPatientLabel(`${match.forename} ${match.surname} (ID: ${match.ID})`);
+      } catch (err) {
+        console.error(err);
+        setSelectedPatientLabel(''); // optional fallback
+      }
+    };
+
+    loadSelectedPatient();
+  }, [order?.customer?.prismId]);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await OrdersAPI.updateOrder(id, order);
+      await fetchOrder();
+      alert('Order updated');
+    } catch (e) {
+      alert(e.message || 'Failed to update order');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleStatusChange = async (newStatus) => {
     try {
@@ -120,9 +181,9 @@ export default function OrderDetail() {
                 <FileText className="w-4 h-4" />
                 Download Receipt
               </button>
-              {/* <button 
-                onClick={handleSave} 
-                disabled={saving} 
+              <button
+                onClick={handleSave}
+                disabled={saving}
                 className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? (
@@ -131,7 +192,7 @@ export default function OrderDetail() {
                   <Save className="w-4 h-4" />
                 )}
                 {saving ? 'Saving...' : 'Save Changes'}
-              </button> */}
+              </button>
             </div>
           </div>
         </div>
@@ -223,6 +284,79 @@ export default function OrderDetail() {
                   disabled
                   onChange={(e) => setOrder({ ...order, customer: { ...order.customer, name: e.target.value } })}
                 />
+              </div>
+              <div className="relative">
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Prism Patient
+                </label>
+
+                {!isSelectingPatient ? (
+                  <div
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm cursor-pointer bg-gray-50"
+                    onClick={() => setIsSelectingPatient(true)}
+                  >
+                    {order?.customer?.prismId ? selectedPatientLabel : "Select patient"}
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Search by name or ID"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                      value={search}
+                      autoFocus
+                      onChange={(e) => setSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          setIsSelectingPatient(false);
+                          setResults([]);
+                        }
+                      }}
+                    />
+
+                    {(prismLoading || results.length > 0) && (
+                      <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-48 overflow-y-auto">
+
+                        {prismLoading && (
+                          <div className="px-3 py-2 text-sm text-gray-500 flex items-center gap-2">
+                            <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                            Searching...
+                          </div>
+                        )}
+
+                        {!prismLoading && results.length === 0 && search && (
+                          <div className="px-3 py-2 text-sm text-gray-500">
+                            No results found
+                          </div>
+                        )}
+
+                        {!prismLoading &&
+                          results.map((p) => (
+                            <div
+                              key={p._id}
+                              className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                              onClick={() => {
+                                setOrder({
+                                  ...order,
+                                  customer: {
+                                    ...order.customer,
+                                    prismId: p._id, // mapping Prism ID -> your prismId field
+                                  },
+                                });
+
+                                setSearch(``);
+                                setSelectedPatientLabel(`${p.name} (ID: ${p.ID})`);
+                                setResults([]);
+                                setIsSelectingPatient(false);
+                              }}
+                            >
+                              {p.name} (ID: {p.ID})
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
