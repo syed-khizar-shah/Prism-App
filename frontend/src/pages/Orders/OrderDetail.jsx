@@ -101,6 +101,18 @@ export default function OrderDetail() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      setSaving(true);
+      await OrdersAPI.deleteOrder(id);
+      navigate(-1);
+    } catch (e) {
+      alert(e.message || 'Failed to update order');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleStatusChange = async (newStatus) => {
     try {
       await OrdersAPI.updateStatus(id, newStatus);
@@ -190,6 +202,13 @@ export default function OrderDetail() {
                   <Save className="w-4 h-4" />
                 )}
                 {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+
+              <button
+                onClick={handleDelete}
+                className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Delete Order
               </button>
             </div>
           </div>
@@ -437,11 +456,12 @@ export default function OrderDetail() {
               </div>
               <div className='border border-gray-200 p-2 rounded-md space-y-2'>
                 <label className="block text-xs font-medium text-gray-800 mb-1">Discounts</label>
+
                 <div className='flex gap-2 align-middle'>
-                  <div className='my-auto text-xs font-medium text-gray-800 w-1/4'>
+                  <div className='my-auto text-left text-xs font-medium text-gray-800 w-3/4'>
                     Promos
                   </div>
-                  <div className="relative w-3/4">
+                  <div className="relative w-1/4">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
                     <input
                       type="number"
@@ -452,16 +472,37 @@ export default function OrderDetail() {
                     />
                   </div>
                 </div>
+
                 <div className='flex gap-2 align-middle'>
-                  <div className='my-auto text-xs font-medium text-gray-800 w-1/4'>
+                  <div className='my-auto text-left text-xs font-medium text-gray-800 w-3/4'>
                     NHS Gos3
                   </div>
-                  <div className="relative w-3/4">
+                  <div className="relative w-1/4">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
                     <input
                       type="number"
                       className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
                       value={order.pricing?.discounts?.nhsgos3 ?? ''}
+                      disabled
+                      onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, discount: Number(e.target.value) } })}
+                    />
+                  </div>
+                </div>
+
+                <div className='flex gap-2 align-middle'>
+                  <div className='my-auto text-left text-xs font-medium text-gray-800 w-3/4'>
+                    Checkout <span className='text-xs text-gray-400'>
+                      ({(order.pricing?.checkoutDiscountType ?? 'fixed') === 'percentage'
+                        ? `${order.pricing?.checkoutDiscountValue ?? 0}% off`
+                        : `$${order.pricing?.checkoutDiscountValue ?? 0} off`})
+                    </span>
+                  </div>
+                  <div className="relative w-1/4">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">$</span>
+                    <input
+                      type="number"
+                      className="w-full pl-6 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
+                      value={order.pricing?.discounts?.checkout ?? ''}
                       disabled
                       onChange={(e) => setOrder({ ...order, pricing: { ...order.pricing, discount: Number(e.target.value) } })}
                     />
@@ -590,6 +631,11 @@ const SelectionTable = ({ data }) => {
       ) : null,
       price: null,
     },
+
+    { label: "RE PD", value: data.rePd, price: null },
+    { label: "LE PD", value: data.lePd, price: null },
+    { label: "RE H", value: data.reH, price: null },
+    { label: "LE H", value: data.leH, price: null },
   ];
 
   if (data.frameData) {
@@ -641,6 +687,15 @@ const SelectionTable = ({ data }) => {
           </tr>
         </tbody>
       </table>
+
+      {data.selectionNotes && (
+        <div className="mt-4">
+          <p className="text-xs font-medium text-gray-500 mb-1">Notes</p>
+          <p className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md p-3 whitespace-pre-line">
+            {data.selectionNotes}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

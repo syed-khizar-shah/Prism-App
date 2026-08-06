@@ -17,6 +17,9 @@ module.exports.buildOrderTotals = (pricing) => {
     const shipping = pricing.shipping;
     const nhsgos3 = pricing.discounts?.nhsgos3 || 0;
     const promo = pricing.discounts?.promo || 0;
+    const checkoutDiscount = pricing.discounts?.checkout || 0;
+    const checkoutDiscountType = pricing.checkoutDiscountType;
+    const checkoutDiscountValue = pricing.checkoutDiscountValue;
     const totalPrice = pricing.totalPrice;
 
     const rows = [];
@@ -62,6 +65,17 @@ module.exports.buildOrderTotals = (pricing) => {
         rows.push([
             { text: 'NHS voucher', fontSize: 9, alignment: 'right' },
             { text: '-' + formatCurrency(nhsgos3), fontSize: 9 }
+        ]);
+    }
+
+    if (checkoutDiscount) {
+        const label = checkoutDiscountType === 'percentage'
+            ? `Discount (${checkoutDiscountValue}% off)`
+            : `Discount (${formatCurrency(checkoutDiscountValue)} off)`;
+
+        rows.push([
+            { text: label, fontSize: 9, alignment: 'right' },
+            { text: '-' + formatCurrency(checkoutDiscount), fontSize: 9 }
         ]);
     }
 

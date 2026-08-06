@@ -5,14 +5,16 @@ const { generateReceiptBuffer } = require('../utils/pdf/pdf');
 const pdfService = require('../services/pdfService');
 const { getConfig } = require('./reportConfigController');
 
-// Create a new order
 // const createOrder = async (req, res) => {
 //   try {
 //     const {
 //       customer,
 //       selections,
+//       sightTest, // Added: Extract sight test from body
 //       promo,
-//       nhsgos3,
+//       nhsgos3 = 0, // Default to 0 if not provided
+//       checkoutDiscountType,
+//       checkoutDiscountValue,
 //       payment,
 //       notes,
 //       salesperson,
@@ -20,60 +22,91 @@ const { getConfig } = require('./reportConfigController');
 //       status
 //     } = req.body;
 
-//     console.log({
-//       customer,
-//       selections,
-//       promo,
-//       nhsgos3,
-//       payment,
-//       notes,
-//       salesperson,
-//       storeLocation,
-//       status
-//     })
+//     console.log("Creating Order with data:", {
+//       customerName: customer?.name,
+//       selectionCount: selections?.length,
+//       sightTest,
+//       totalPayment: payment?.amount
+//     });
 
-//     // Validate required fields
+//     // --- 1. Validation ---
 //     if (!customer || !customer.name) {
-//       return res.status(400).json({
-//         success: false,
-//         error: 'Customer name is required'
-//       });
+//       return res.status(400).json({ success: false, error: 'Customer name is required' });
 //     }
 
 //     if (!selections || selections.length === 0) {
-//       return res.status(400).json({
-//         success: false,
-//         error: 'At least one selection is required'
-//       });
+//       return res.status(400).json({ success: false, error: 'At least one selection is required' });
 //     }
 
 //     if (!payment || !payment.method || !payment.amount) {
-//       return res.status(400).json({
-//         success: false,
-//         error: 'Payment method and amount are required'
-//       });
+//       return res.status(400).json({ success: false, error: 'Payment method and amount are required' });
 //     }
 
-//     // Calculate pricing from selections
-//     const subtotal = selections.reduce((total, selection) => {
+//     if (checkoutDiscountType && !['percentage', 'fixed'].includes(checkoutDiscountType)) {
+//       return res.status(400).json({ success: false, error: 'Invalid checkout discount type' });
+//     }
+
+//     if (checkoutDiscountValue != null && checkoutDiscountValue < 0) {
+//       return res.status(400).json({ success: false, error: 'Checkout discount value cannot be negative' });
+//     }
+
+//     if (checkoutDiscountType === 'percentage' && checkoutDiscountValue > 100) {
+//       return res.status(400).json({ success: false, error: 'Percentage discount cannot exceed 100' });
+//     }
+
+//     // --- 2. Calculation Logic ---
+
+//     // Calculate sum of frames/lenses
+//     const selectionsTotal = selections.reduce((total, selection) => {
 //       return total + (selection.selectionPrice || 0);
 //     }, 0);
 
-//     const discount = (promo ? (promo.appliedDiscount || 0) : 0 ) + nhsgos3;
-//     const totalPrice = subtotal - discount;
+//     // Get sight test fee (default to 0 if not applicable)
+//     const sightTestFee = (sightTest && sightTest.hadTest) ? (sightTest.price || 0) : 0;
 
-//     // Create the order
+//     // Subtotal = Frames/Lenses + Sight Test Fee
+//     const subtotal = selectionsTotal + sightTestFee;
+
+//     // Calculate Discounts
+//     const promoDiscount = promo ? (promo.appliedDiscount || 0) : 0;
+
+//     const preCheckoutDiscountAmount = Math.max(subtotal - promoDiscount - nhsgos3, 0);
+
+//     let checkoutDiscountAmount = 0;
+//     if (checkoutDiscountType && checkoutDiscountValue) {
+//       if (checkoutDiscountType === 'percentage') {
+//         checkoutDiscountAmount = (preCheckoutDiscountAmount * checkoutDiscountValue) / 100;
+//       } else {
+//         checkoutDiscountAmount = checkoutDiscountValue;
+//       }
+//       // Never let it exceed what's left to discount
+//       checkoutDiscountAmount = Math.min(checkoutDiscountAmount, preCheckoutDiscountAmount);
+//     }
+
+//     const totalDiscount = promoDiscount + nhsgos3;
+
+//     // Final Total
+//     const totalPrice = subtotal - totalDiscount;
+
+//     // --- 3. Create Order Document ---
 //     const order = new Order({
 //       customer,
 //       selections,
+//       sightTest: {
+//         hadTest: sightTest?.hadTest || false,
+//         category: sightTest?.category || null,
+//         tier: sightTest?.tier || null,
+//         price: sightTestFee
+//       },
 //       promo,
 //       payment,
 //       pricing: {
 //         subtotal,
-//         discount,
-//         discounts:{
-//           promo: (promo ? (promo.appliedDiscount || 0) : 0 ),
-//           nhsgos3
+//         sightTestFee, // Explicitly stored for reporting
+//         discount: totalDiscount,
+//         discounts: {
+//           promo: promoDiscount,
+//           nhsgos3: nhsgos3
 //         },
 //         totalPrice,
 //         tax: 0,
@@ -85,11 +118,8 @@ const { getConfig } = require('./reportConfigController');
 //       status
 //     });
 
-//     // Order ID will be automatically generated by the schema pre-save middleware
-
 //     // Save the order
 //     const savedOrder = await order.save();
-//     console.log({ savedOrder })
 
 //     res.status(201).json({
 //       success: true,
@@ -100,7 +130,6 @@ const { getConfig } = require('./reportConfigController');
 //   } catch (error) {
 //     console.error('Error creating order:', error);
 
-//     // Provide more detailed error information
 //     let errorMessage = 'Failed to create order';
 //     if (error.name === 'ValidationError') {
 //       errorMessage = 'Validation error: ' + Object.values(error.errors).map(err => err.message).join(', ');
@@ -116,16 +145,16 @@ const { getConfig } = require('./reportConfigController');
 //   }
 // };
 
-// Get all orders with pagination and filtering
-
 const createOrder = async (req, res) => {
   try {
     const {
       customer,
       selections,
-      sightTest, // Added: Extract sight test from body
+      sightTest,
       promo,
-      nhsgos3 = 0, // Default to 0 if not provided
+      nhsgos3 = 0,
+      checkoutDiscountType,   // 'percentage' | 'fixed'
+      checkoutDiscountValue,  // raw number entered by staff
       payment,
       notes,
       salesperson,
@@ -153,6 +182,18 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Payment method and amount are required' });
     }
 
+    if (checkoutDiscountType && !['percentage', 'fixed'].includes(checkoutDiscountType)) {
+      return res.status(400).json({ success: false, error: 'Invalid checkout discount type' });
+    }
+
+    if (checkoutDiscountValue != null && checkoutDiscountValue < 0) {
+      return res.status(400).json({ success: false, error: 'Checkout discount value cannot be negative' });
+    }
+
+    if (checkoutDiscountType === 'percentage' && checkoutDiscountValue > 100) {
+      return res.status(400).json({ success: false, error: 'Percentage discount cannot exceed 100' });
+    }
+
     // --- 2. Calculation Logic ---
 
     // Calculate sum of frames/lenses
@@ -166,12 +207,28 @@ const createOrder = async (req, res) => {
     // Subtotal = Frames/Lenses + Sight Test Fee
     const subtotal = selectionsTotal + sightTestFee;
 
-    // Calculate Discounts
+    // Calculate promo + NHS discounts first
     const promoDiscount = promo ? (promo.appliedDiscount || 0) : 0;
-    const totalDiscount = promoDiscount + nhsgos3;
+
+    // Amount remaining after promo/NHS, before checkout discount
+    const preCheckoutDiscountAmount = Math.max(subtotal - promoDiscount - nhsgos3, 0);
+
+    // Resolve checkout discount amount from type + value
+    let checkoutDiscountAmount = 0;
+    if (checkoutDiscountType && checkoutDiscountValue) {
+      if (checkoutDiscountType === 'percentage') {
+        checkoutDiscountAmount = (preCheckoutDiscountAmount * checkoutDiscountValue) / 100;
+      } else {
+        checkoutDiscountAmount = checkoutDiscountValue;
+      }
+      // Never let it exceed what's left to discount
+      checkoutDiscountAmount = Math.min(checkoutDiscountAmount, preCheckoutDiscountAmount);
+    }
+
+    const totalDiscount = promoDiscount + nhsgos3 + checkoutDiscountAmount;
 
     // Final Total
-    const totalPrice = subtotal - totalDiscount;
+    const totalPrice = Math.max(subtotal - totalDiscount, 0);
 
     // --- 3. Create Order Document ---
     const order = new Order({
@@ -187,12 +244,15 @@ const createOrder = async (req, res) => {
       payment,
       pricing: {
         subtotal,
-        sightTestFee, // Explicitly stored for reporting
+        sightTestFee,
         discount: totalDiscount,
         discounts: {
           promo: promoDiscount,
-          nhsgos3: nhsgos3
+          nhsgos3: nhsgos3,
+          checkout: checkoutDiscountAmount
         },
+        checkoutDiscountType: checkoutDiscountType || undefined,
+        checkoutDiscountValue: checkoutDiscountValue || undefined,
         totalPrice,
         tax: 0,
         shipping: 0

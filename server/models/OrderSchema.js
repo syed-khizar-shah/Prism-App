@@ -19,7 +19,7 @@ const orderSightTestSchema = new mongoose.Schema({
 
 // Schema for customer information
 const customerInfoSchema = new mongoose.Schema({
-  prismId:{
+  prismId: {
     type: String,
     trim: true,
     index: true,
@@ -125,6 +125,15 @@ const orderSelectionSchema = new mongoose.Schema({
     default: {}
   },
 
+  rePd: Number,
+  lePd: Number,
+  reH: Number,
+  leH: Number,
+  selectionNotes: {
+    type: String,
+    trim: true
+  },
+
   // Calculated price for this selection
   selectionPrice: {
     type: Number,
@@ -174,7 +183,20 @@ const orderPricingSchema = new mongoose.Schema({
     nhsgos3: {
       type: Number,
       min: 0
+    },
+    checkout: {                    // <-- resolved monetary amount
+      type: Number,
+      min: 0,
+      default: 0
     }
+  },
+  checkoutDiscountType: {          // <-- what the staff toggled
+    type: String,
+    enum: ['percentage', 'fixed'],
+  },
+  checkoutDiscountValue: {         // <-- raw value entered (e.g. 10 for 10% or 10 for £10)
+    type: Number,
+    min: 0
   },
   totalPrice: {
     type: Number,
