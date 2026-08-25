@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { MONEY_EPSILON, round2 } = require('../utils/money');
 
 // Schema for Sight Test
 const orderSightTestSchema = new mongoose.Schema({
@@ -48,7 +49,30 @@ const customerInfoSchema = new mongoose.Schema({
 }, { _id: false });
 
 // Schema for payment information
-const paymentInfoSchema = new mongoose.Schema({
+// const paymentInfoSchema = new mongoose.Schema({
+//   method: {
+//     type: String,
+//     required: true,
+//     enum: ['Cash', 'Card', 'Bank Transfer', 'Cheque', 'Other']
+//   },
+//   amount: {
+//     type: Number,
+//     required: true,
+//     min: 0
+//   },
+//   transactionId: String,
+//   paymentDate: Date,
+//   notes: String
+// }, { _id: false });
+
+// Schema for a single payment transaction (deposit, balance, partial, etc.)
+const paymentTransactionSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+    enum: ['deposit', 'balance', 'partial', 'refund', 'full'],
+    default: 'partial'
+  },
   method: {
     type: String,
     required: true,
@@ -60,8 +84,44 @@ const paymentInfoSchema = new mongoose.Schema({
     min: 0
   },
   transactionId: String,
-  paymentDate: Date,
+  paymentDate: {
+    type: Date,
+    default: Date.now
+  },
+  takenBy: String,
   notes: String
+}, { _id: true }); // individual payments get their own _id so they can be referenced/voided
+
+// Schema for overall payment state on the order
+const paymentInfoSchema = new mongoose.Schema({
+  transactions: {
+    type: [paymentTransactionSchema],
+    required: true,
+    validate: {
+      validator: arr => arr && arr.length > 0,
+      message: 'Order must have at least one payment transaction'
+    }
+  },
+
+  // Denormalized summary fields — kept in sync via pre-save hook
+  amountPaid: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  balanceDue: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['unpaid', 'deposit_paid', 'partially_paid', 'paid', 'refunded'],
+    default: 'unpaid',
+    index: true
+  },
+
+  balanceDueDate: Date // e.g. expected on delivery/collection
 }, { _id: false });
 
 // Schema for order selection
@@ -304,6 +364,40 @@ orderSchema.index({ 'customer.email': 1 });
 orderSchema.index({ status: 1, orderDate: -1 });
 orderSchema.index({ 'pricing.totalPrice': -1 });
 orderSchema.index({ createdAt: -1 });
+orderSchema.index({ 'payment.balanceDue': -1 });
+
+orderSchema.pre('save', function (next) {
+  const transactions = this.payment?.transactions || [];
+
+  const paid = round2(
+    transactions
+      .filter(t => t.type !== 'refund')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+  const refunded = round2(
+    transactions
+      .filter(t => t.type === 'refund')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+
+  const netPaid = round2(paid - refunded);
+  const total = round2(this.pricing?.totalPrice || 0);
+
+  this.payment.amountPaid = netPaid;
+  this.payment.balanceDue = round2(Math.max(total - netPaid, 0));
+
+  if (netPaid <= 0) {
+    this.payment.paymentStatus = 'unpaid';
+  } else if (netPaid >= total - MONEY_EPSILON) {
+    this.payment.paymentStatus = 'paid';
+  } else if (transactions.some(t => t.type === 'deposit')) {
+    this.payment.paymentStatus = 'deposit_paid';
+  } else {
+    this.payment.paymentStatus = 'partially_paid';
+  }
+
+  next();
+});
 
 // Pre-save middleware to generate orderId if not provided
 orderSchema.pre('save', async function (next) {
@@ -411,6 +505,51 @@ orderSchema.statics.getDateFromOrderId = function (orderId) {
   const fullYear = year < 50 ? 2000 + year : 1900 + year;
 
   return new Date(fullYear, month - 1, day);
+};
+
+orderSchema.methods.addPayment = function (transaction) {
+  const total = round2(this.pricing?.totalPrice || 0);
+
+  const currentlyPaid = round2(
+    this.payment.transactions
+      .filter(t => t.type !== 'refund')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+  const currentlyRefunded = round2(
+    this.payment.transactions
+      .filter(t => t.type === 'refund')
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+  const netPaidSoFar = round2(currentlyPaid - currentlyRefunded);
+
+  // Round the incoming transaction amount too, so stray float input can't sneak in
+  transaction.amount = round2(transaction.amount);
+
+  if (transaction.type !== 'refund') {
+    const projectedTotal = round2(netPaidSoFar + transaction.amount);
+
+    if (projectedTotal > total + MONEY_EPSILON) {
+      const remaining = round2(Math.max(total - netPaidSoFar, 0));
+      const err = new Error(
+        `Payment of ${transaction.amount} would exceed the order total. ` +
+        `Remaining balance is ${remaining.toFixed(2)}.`
+      );
+      err.code = 'PAYMENT_EXCEEDS_TOTAL';
+      err.remaining = remaining;
+      throw err;
+    }
+  } else {
+    if (transaction.amount > netPaidSoFar + MONEY_EPSILON) {
+      const err = new Error(
+        `Refund of ${transaction.amount} exceeds amount paid (${netPaidSoFar.toFixed(2)}).`
+      );
+      err.code = 'REFUND_EXCEEDS_PAID';
+      throw err;
+    }
+  }
+
+  this.payment.transactions.push(transaction);
+  return this.save();
 };
 
 const Order = mongoose.model('Order', orderSchema);

@@ -2,7 +2,7 @@ import axios from "axios";
 import axiosInstance from "../../../api/axios";
 
 class OrdersAPI {
-  
+
   static async getOrders({ page = 1, limit = 20, status, search } = {}) {
     const params = new URLSearchParams();
     params.set('page', page);
@@ -58,6 +58,14 @@ class OrdersAPI {
     });
     return response.data; // Axios returns the blob directly in response.data
   }
+
+  static async addPayment(id, transaction) {
+    const response = await axiosInstance.post(`/api/orders/${id}/payments`, transaction);
+    const data = response.data;
+    if (!data.success) throw new Error(data.error || 'Failed to add payment');
+    return data;
+  }
+
 
 }
 

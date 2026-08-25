@@ -4,146 +4,9 @@ const ReportConfig = require('../models/reportConfig');
 const { generateReceiptBuffer } = require('../utils/pdf/pdf');
 const pdfService = require('../services/pdfService');
 const { getConfig } = require('./reportConfigController');
+const { MONEY_EPSILON, round2 } = require('../utils/money');
 
-// const createOrder = async (req, res) => {
-//   try {
-//     const {
-//       customer,
-//       selections,
-//       sightTest, // Added: Extract sight test from body
-//       promo,
-//       nhsgos3 = 0, // Default to 0 if not provided
-//       checkoutDiscountType,
-//       checkoutDiscountValue,
-//       payment,
-//       notes,
-//       salesperson,
-//       storeLocation,
-//       status
-//     } = req.body;
-
-//     console.log("Creating Order with data:", {
-//       customerName: customer?.name,
-//       selectionCount: selections?.length,
-//       sightTest,
-//       totalPayment: payment?.amount
-//     });
-
-//     // --- 1. Validation ---
-//     if (!customer || !customer.name) {
-//       return res.status(400).json({ success: false, error: 'Customer name is required' });
-//     }
-
-//     if (!selections || selections.length === 0) {
-//       return res.status(400).json({ success: false, error: 'At least one selection is required' });
-//     }
-
-//     if (!payment || !payment.method || !payment.amount) {
-//       return res.status(400).json({ success: false, error: 'Payment method and amount are required' });
-//     }
-
-//     if (checkoutDiscountType && !['percentage', 'fixed'].includes(checkoutDiscountType)) {
-//       return res.status(400).json({ success: false, error: 'Invalid checkout discount type' });
-//     }
-
-//     if (checkoutDiscountValue != null && checkoutDiscountValue < 0) {
-//       return res.status(400).json({ success: false, error: 'Checkout discount value cannot be negative' });
-//     }
-
-//     if (checkoutDiscountType === 'percentage' && checkoutDiscountValue > 100) {
-//       return res.status(400).json({ success: false, error: 'Percentage discount cannot exceed 100' });
-//     }
-
-//     // --- 2. Calculation Logic ---
-
-//     // Calculate sum of frames/lenses
-//     const selectionsTotal = selections.reduce((total, selection) => {
-//       return total + (selection.selectionPrice || 0);
-//     }, 0);
-
-//     // Get sight test fee (default to 0 if not applicable)
-//     const sightTestFee = (sightTest && sightTest.hadTest) ? (sightTest.price || 0) : 0;
-
-//     // Subtotal = Frames/Lenses + Sight Test Fee
-//     const subtotal = selectionsTotal + sightTestFee;
-
-//     // Calculate Discounts
-//     const promoDiscount = promo ? (promo.appliedDiscount || 0) : 0;
-
-//     const preCheckoutDiscountAmount = Math.max(subtotal - promoDiscount - nhsgos3, 0);
-
-//     let checkoutDiscountAmount = 0;
-//     if (checkoutDiscountType && checkoutDiscountValue) {
-//       if (checkoutDiscountType === 'percentage') {
-//         checkoutDiscountAmount = (preCheckoutDiscountAmount * checkoutDiscountValue) / 100;
-//       } else {
-//         checkoutDiscountAmount = checkoutDiscountValue;
-//       }
-//       // Never let it exceed what's left to discount
-//       checkoutDiscountAmount = Math.min(checkoutDiscountAmount, preCheckoutDiscountAmount);
-//     }
-
-//     const totalDiscount = promoDiscount + nhsgos3;
-
-//     // Final Total
-//     const totalPrice = subtotal - totalDiscount;
-
-//     // --- 3. Create Order Document ---
-//     const order = new Order({
-//       customer,
-//       selections,
-//       sightTest: {
-//         hadTest: sightTest?.hadTest || false,
-//         category: sightTest?.category || null,
-//         tier: sightTest?.tier || null,
-//         price: sightTestFee
-//       },
-//       promo,
-//       payment,
-//       pricing: {
-//         subtotal,
-//         sightTestFee, // Explicitly stored for reporting
-//         discount: totalDiscount,
-//         discounts: {
-//           promo: promoDiscount,
-//           nhsgos3: nhsgos3
-//         },
-//         totalPrice,
-//         tax: 0,
-//         shipping: 0
-//       },
-//       notes,
-//       salesperson,
-//       storeLocation,
-//       status
-//     });
-
-//     // Save the order
-//     const savedOrder = await order.save();
-
-//     res.status(201).json({
-//       success: true,
-//       order: savedOrder,
-//       message: 'Order created successfully'
-//     });
-
-//   } catch (error) {
-//     console.error('Error creating order:', error);
-
-//     let errorMessage = 'Failed to create order';
-//     if (error.name === 'ValidationError') {
-//       errorMessage = 'Validation error: ' + Object.values(error.errors).map(err => err.message).join(', ');
-//     } else if (error.code === 11000) {
-//       errorMessage = 'Duplicate order ID';
-//     }
-
-//     res.status(500).json({
-//       success: false,
-//       error: errorMessage,
-//       details: error.message
-//     });
-//   }
-// };
+// Helper: round to 2 decimal places safely
 
 const createOrder = async (req, res) => {
   try {
@@ -161,6 +24,20 @@ const createOrder = async (req, res) => {
       storeLocation,
       status
     } = req.body;
+    console.log({
+      customer,
+      selections,
+      sightTest,
+      promo,
+      nhsgos3,
+      checkoutDiscountType,   // 'percentage' | 'fixed'
+      checkoutDiscountValue,  // raw number entered by staff
+      payment,
+      notes,
+      salesperson,
+      storeLocation,
+      status
+    })
 
     console.log("Creating Order with data:", {
       customerName: customer?.name,
@@ -178,18 +55,26 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, error: 'At least one selection is required' });
     }
 
-    if (!payment || !payment.method || !payment.amount) {
-      return res.status(400).json({ success: false, error: 'Payment method and amount are required' });
+    if (!payment || !payment.method || typeof payment.amount !== 'number' || payment.amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Payment method and a positive amount are required' });
+    }
+    payment.amount = round2(payment.amount);
+
+    const validPaymentTypes = ['deposit', 'balance', 'partial', 'full'];
+    if (payment.type && !validPaymentTypes.includes(payment.type)) {
+      return res.status(400).json({ success: false, error: 'Invalid payment type' });
     }
 
     if (checkoutDiscountType && !['percentage', 'fixed'].includes(checkoutDiscountType)) {
       return res.status(400).json({ success: false, error: 'Invalid checkout discount type' });
     }
 
-    if (checkoutDiscountValue != null && checkoutDiscountValue < 0) {
-      return res.status(400).json({ success: false, error: 'Checkout discount value cannot be negative' });
+    if (checkoutDiscountValue != null && (typeof checkoutDiscountValue !== 'number' || isNaN(checkoutDiscountValue))) {
+      return res.status(400).json({ success: false, error: 'Checkout discount value must be a valid number' });
     }
-
+    if (nhsgos3 != null && (typeof nhsgos3 !== 'number' || isNaN(nhsgos3) || nhsgos3 < 0)) {
+      return res.status(400).json({ success: false, error: 'NHS GOS3 must be a non-negative number' });
+    }
     if (checkoutDiscountType === 'percentage' && checkoutDiscountValue > 100) {
       return res.status(400).json({ success: false, error: 'Percentage discount cannot exceed 100' });
     }
@@ -197,9 +82,9 @@ const createOrder = async (req, res) => {
     // --- 2. Calculation Logic ---
 
     // Calculate sum of frames/lenses
-    const selectionsTotal = selections.reduce((total, selection) => {
+    const selectionsTotal = round2(selections.reduce((total, selection) => {
       return total + (selection.selectionPrice || 0);
-    }, 0);
+    }, 0));
 
     // Get sight test fee (default to 0 if not applicable)
     const sightTestFee = (sightTest && sightTest.hadTest) ? (sightTest.price || 0) : 0;
@@ -210,8 +95,12 @@ const createOrder = async (req, res) => {
     // Calculate promo + NHS discounts first
     const promoDiscount = promo ? (promo.appliedDiscount || 0) : 0;
 
+    if (nhsgos3 != null && (typeof nhsgos3 !== 'number' || isNaN(nhsgos3) || nhsgos3 < 0)) {
+      return res.status(400).json({ success: false, error: 'NHS GOS3 must be a non-negative number' });
+    }
+
     // Amount remaining after promo/NHS, before checkout discount
-    const preCheckoutDiscountAmount = Math.max(subtotal - promoDiscount - nhsgos3, 0);
+    const preCheckoutDiscountAmount = round2(Math.max(subtotal - promoDiscount - nhsgos3, 0));
 
     // Resolve checkout discount amount from type + value
     let checkoutDiscountAmount = 0;
@@ -221,14 +110,22 @@ const createOrder = async (req, res) => {
       } else {
         checkoutDiscountAmount = checkoutDiscountValue;
       }
-      // Never let it exceed what's left to discount
-      checkoutDiscountAmount = Math.min(checkoutDiscountAmount, preCheckoutDiscountAmount);
+      checkoutDiscountAmount = round2(Math.min(checkoutDiscountAmount, preCheckoutDiscountAmount));
     }
 
-    const totalDiscount = promoDiscount + nhsgos3 + checkoutDiscountAmount;
+    const totalDiscount = round2(promoDiscount + nhsgos3 + checkoutDiscountAmount);
 
     // Final Total
-    const totalPrice = Math.max(subtotal - totalDiscount, 0);
+    const totalPrice = round2(Math.max(subtotal - totalDiscount, 0));
+
+    if (payment.amount > totalPrice + MONEY_EPSILON) {
+      return res.status(400).json({
+        success: false,
+        error: `Payment of ${payment.amount} exceeds order total of ${totalPrice}`
+      });
+    }
+    const inferredType = payment.type || (payment.amount >= totalPrice ? 'full' : 'deposit');
+
 
     // --- 3. Create Order Document ---
     const order = new Order({
@@ -241,7 +138,18 @@ const createOrder = async (req, res) => {
         price: sightTestFee
       },
       promo,
-      payment,
+      payment: {
+        transactions: [{
+          type: inferredType, // default: assume full payment if type not specified
+          method: payment.method,
+          amount: payment.amount,
+          transactionId: payment.transactionId,
+          paymentDate: payment.paymentDate || new Date(),
+          takenBy: payment.takenBy || salesperson,
+          notes: payment.notes
+        }]
+        // amountPaid / balanceDue / paymentStatus filled in by the pre-save hook
+      },
       pricing: {
         subtotal,
         sightTestFee,
@@ -290,67 +198,104 @@ const createOrder = async (req, res) => {
   }
 };
 
+const addOrderPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type, method, amount, transactionId, notes, takenBy } = req.body;
+
+    if (!method || typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Payment method and a positive amount are required' });
+    }
+
+    const validPaymentTypes = ['deposit', 'balance', 'partial', 'full', 'refund'];
+    if (type && !validPaymentTypes.includes(type)) {
+      return res.status(400).json({ success: false, error: 'Invalid payment type' });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    await order.addPayment({ type: type || 'balance', method, amount, transactionId, notes, takenBy });
+
+    res.json({
+      success: true,
+      order,
+      paymentStatus: order.payment.paymentStatus,
+      amountPaid: order.payment.amountPaid,
+      balanceDue: order.payment.balanceDue
+    });
+
+  } catch (error) {
+    if (error.code === 'PAYMENT_EXCEEDS_TOTAL' || error.code === 'REFUND_EXCEEDS_PAID' || error.code === 'INVALID_AMOUNT') {
+      return res.status(400).json({ success: false, error: error.message, remaining: error.remaining });
+    }
+    console.error('Error adding payment:', error);
+    res.status(500).json({ success: false, error: 'Failed to add payment', details: error.message });
+  }
+};
+
 const getOrders = async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 10,
+      limit = 20,
       status,
-      customerName,
-      startDate,
-      endDate,
-      sortBy = 'orderDate',
-      sortOrder = 'desc'
+      search,
     } = req.query;
 
-    // Build filter object
     const filter = {};
 
     if (status) {
       filter.status = status;
     }
 
-    if (customerName) {
-      filter['customer.name'] = { $regex: customerName, $options: 'i' };
+    if (search) {
+      filter.$or = [
+        {
+          'customer.name': {
+            $regex: search,
+            $options: 'i',
+          },
+        },
+        {
+          orderId: {
+            $regex: search,
+            $options: 'i',
+          },
+        },
+      ];
     }
 
-    if (startDate || endDate) {
-      filter.orderDate = {};
-      if (startDate) filter.orderDate.$gte = new Date(startDate);
-      if (endDate) filter.orderDate.$lte = new Date(endDate);
-    }
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
 
-    // Build sort object
-    const sort = {};
-    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    const [orders, total] = await Promise.all([
+      Order.find(filter)
+        .sort({ orderDate: -1 })
+        .skip(skip)
+        .limit(limitNumber),
 
-    // Calculate skip value for pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Execute query
-    const orders = await Order.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    // Get total count for pagination
-    const total = await Order.countDocuments(filter);
+      Order.countDocuments(filter),
+    ]);
 
     res.json({
       success: true,
       orders,
       total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
+      page: pageNumber,
+      limit: limitNumber,
+      totalPages: Math.ceil(total / limitNumber),
     });
-
   } catch (error) {
     console.error('Error fetching orders:', error);
+
     res.status(500).json({
       success: false,
       error: 'Failed to fetch orders',
-      details: error.message
+      details: error.message,
     });
   }
 };
@@ -446,7 +391,8 @@ const getOrderByPrismId = async (req, res) => {
 const updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = { ...req.body };
+    delete updateData.payment;
 
     // // Remove fields that shouldn't be updated directly
     // delete updateData._id;
@@ -630,6 +576,7 @@ const generateReceipt = async (req, res) => {
 
 module.exports = {
   createOrder,
+  addOrderPayment,
   getOrders,
   getOrderById,
   getOrderByOrderId,

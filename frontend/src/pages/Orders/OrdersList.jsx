@@ -24,7 +24,7 @@ export default function OrdersList() {
       setLoading(true);
       setError('');
       const data = await OrdersAPI.getOrders({ page, limit, status, search });
-      console.log("data: here is ",data)
+      console.log("data: here is ", data)
       // Expecting shape: { data, total, page, limit }
       setOrders(data.orders);
       setTotal(data.total);
@@ -93,7 +93,21 @@ export default function OrdersList() {
       </div>
     );
   }
+  const PAYMENT_STATUS_STYLES = {
+    unpaid: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+    deposit_paid: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+    partially_paid: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+    paid: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    refunded: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+  };
 
+  const PAYMENT_STATUS_LABEL = {
+    unpaid: 'Unpaid',
+    deposit_paid: 'Deposit paid',
+    partially_paid: 'Partial',
+    paid: 'Paid',
+    refunded: 'Refunded',
+  };
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -130,9 +144,9 @@ export default function OrdersList() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
               />
             </div>
-            <select 
-              value={status} 
-              onChange={(e) => setStatus(e.target.value)} 
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
             >
               <option value="">All Statuses</option>
@@ -143,17 +157,17 @@ export default function OrdersList() {
               <option value="cancelled">Cancelled</option>
               <option value="refunded">Refunded</option>
             </select>
-            <select 
-              value={limit} 
-              onChange={(e) => setLimit(Number(e.target.value))} 
+            <select
+              value={limit}
+              onChange={(e) => setLimit(Number(e.target.value))}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors"
             >
               <option value={10}>10 per page</option>
               <option value={20}>20 per page</option>
               <option value={50}>50 per page</option>
             </select>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors"
             >
               Search
@@ -222,11 +236,14 @@ export default function OrdersList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {order.pricing?.totalPrice?.toFixed ? `$${order.pricing.totalPrice.toFixed(2)}` : order.pricing?.totalPrice || 'N/A'}
+                        {order.pricing?.totalPrice?.toFixed ? `£${order.pricing.totalPrice.toFixed(2)}` : order.pricing?.totalPrice || 'N/A'}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {order.payment?.method || 'No payment method'}
-                      </div>
+                      <span
+                        className={`mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ring-1 ring-inset ${PAYMENT_STATUS_STYLES[order.payment?.paymentStatus] || PAYMENT_STATUS_STYLES.unpaid
+                          }`}
+                      >
+                        {PAYMENT_STATUS_LABEL[order.payment?.paymentStatus] || 'Unpaid'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
@@ -234,7 +251,7 @@ export default function OrdersList() {
                         onChange={(e) => handleStatusChange(order._id, e.target.value)}
                         className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(order.status)} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors`}
                       >
-                        {['pending','confirmed','processing','completed','cancelled','refunded'].map(s => (
+                        {['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'refunded'].map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
@@ -250,14 +267,14 @@ export default function OrdersList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-2">
-                        <Link 
+                        <Link
                           to={`/orders/${order._id}`}
                           className="text-gray-400 hover:text-gray-600 p-2 rounded transition-colors"
                           title="View order details"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
-                        <button 
+                        <button
                           onClick={() => handleReceipt(order._id, order.orderId)}
                           className="text-gray-400 hover:text-gray-600 p-2 rounded transition-colors"
                           title="Download receipt"
@@ -293,16 +310,16 @@ export default function OrdersList() {
               Page {page} of {totalPages} • {total} total orders
             </div>
             <div className="flex gap-2">
-              <button 
-                disabled={page <= 1} 
-                onClick={() => setPage((p) => Math.max(1, p - 1))} 
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
               >
                 Previous
               </button>
-              <button 
-                disabled={page >= totalPages} 
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))} 
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
               >
                 Next

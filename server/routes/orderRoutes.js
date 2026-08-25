@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   createOrder,
+  addOrderPayment,
   getOrders,
   getOrderById,
   getOrderByOrderId,
@@ -15,6 +16,7 @@ const {
 
 // Create a new order
 router.post('/', createOrder);
+router.post('/:id/payments', addOrderPayment);
 
 // Get all orders with pagination and filtering
 router.get('/', getOrders);
