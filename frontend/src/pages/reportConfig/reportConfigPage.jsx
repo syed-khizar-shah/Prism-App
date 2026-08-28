@@ -6,16 +6,31 @@ const SECTION_META = {
   items: {
     label: 'Items',
     rows: {
-      frame:       'Frame',
-      ageGroup:    'Age Group',
-      lensType:    'Lens Type',
+      frame: 'Frame',
+      ageGroup: 'Age Group',
+      lensType: 'Lens Type',
       lensSubtype: 'Lens Subtype',
-      lensIndex:   'Lens Index',
-      design:      'Design',
-      coatings:    'Coatings',
-      extras:      'Extras',
-      color:       'Color',
-      subtotal:    'Subtotal',
+      lensIndex: 'Lens Index',
+      design: 'Design',
+      coatings: 'Coatings',
+      extras: 'Extras',
+      color: 'Color',
+      subtotal: 'Subtotal',
+    },
+  },
+
+  totals: {
+    label: 'Totals',
+    rows: {
+      subtotal: 'Subtotal',
+      promo: 'Promotion',
+      nhsgos3: 'NHS Voucher',
+      checkoutDiscount: 'Discount',
+      total: 'Total',
+      paymentStatus: 'Status',
+      transactions: 'Payment History',
+      amountPaid: 'Amount Paid',
+      balanceDue: 'Balance Due',
     },
   },
 };
@@ -23,13 +38,13 @@ const SECTION_META = {
 const SECTION_KEYS = Object.keys(SECTION_META);
 
 const ReportConfig = () => {
-  const [sections, setSections]   = useState(null);
-  const [expanded, setExpanded]   = useState({ items: true });
-  const [loading, setLoading]     = useState(true);
-  const [saving, setSaving]       = useState(false);
+  const [sections, setSections] = useState(null);
+  const [expanded, setExpanded] = useState({ items: true, totals: true });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [error, setError]         = useState(null);
-  const [saved, setSaved]         = useState(false);
+  const [error, setError] = useState(null);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => { fetchConfig(); }, []);
 
@@ -38,11 +53,11 @@ const ReportConfig = () => {
     setError(null);
     try {
       const res = await axiosInstance.get('/api/report-config');
-      console.log({res});
-      console.log({d:res.data.data.sections});
+      console.log({ res });
+      console.log({ d: res.data.data.sections });
       setSections(res.data.data.sections);
     } catch (err) {
-      console.log({err})
+      console.log({ err })
       setError(err.response?.data?.message || 'Failed to load report config');
     } finally {
       setLoading(false);
@@ -167,20 +182,19 @@ const ReportConfig = () => {
 
       <div className="space-y-4 mb-8">
         {SECTION_KEYS.map((sectionKey) => {
-          const meta    = SECTION_META[sectionKey];
+          const meta = SECTION_META[sectionKey];
           const section = sections?.[sectionKey];
           if (!section) return null;
 
-          const rowKeys      = Object.keys(meta.rows);
+          const rowKeys = Object.keys(meta.rows);
           const visibleCount = rowKeys.filter(r => section.rows?.[r]?.enabled).length;
-          const isExpanded   = expanded[sectionKey] ?? true;
+          const isExpanded = expanded[sectionKey] ?? true;
 
           return (
             <div
               key={sectionKey}
-              className={`border rounded-lg overflow-hidden transition-colors ${
-                section.enabled ? 'border-gray-200' : 'border-gray-100'
-              }`}
+              className={`border rounded-lg overflow-hidden transition-colors ${section.enabled ? 'border-gray-200' : 'border-gray-100'
+                }`}
             >
               <div className={`flex items-center gap-3 px-4 py-3 bg-gray-50 ${!section.enabled ? 'opacity-60' : ''}`}>
                 {/* <button type="button" onClick={() => toggleSection(sectionKey)} className="flex-shrink-0 text-gray-400 hover:text-gray-900 transition-colors">
@@ -191,9 +205,8 @@ const ReportConfig = () => {
 
                 <span className="text-xs text-gray-400">{visibleCount} / {rowKeys.length} rows visible</span>
 
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                  section.enabled ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'
-                }`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${section.enabled ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'
+                  }`}>
                   {section.enabled ? 'Visible' : 'Hidden'}
                 </span>
 
@@ -209,7 +222,7 @@ const ReportConfig = () => {
               {isExpanded && (
                 <div className={`divide-y divide-gray-100 ${!section.enabled ? 'opacity-40 pointer-events-none' : ''}`}>
                   {rowKeys.map((rowKey) => {
-                    const row       = section.rows?.[rowKey];
+                    const row = section.rows?.[rowKey];
                     const isEnabled = row?.enabled ?? true;
 
                     return (
@@ -229,9 +242,8 @@ const ReportConfig = () => {
                           className="flex-1 max-w-xs px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-gray-400 focus:border-gray-400 disabled:bg-gray-100 disabled:text-gray-400"
                         />
 
-                        <span className={`ml-auto flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
-                          isEnabled ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'
-                        }`}>
+                        <span className={`ml-auto flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${isEnabled ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'
+                          }`}>
                           {isEnabled ? 'Visible' : 'Hidden'}
                         </span>
                       </div>

@@ -30,7 +30,7 @@ function generateReceiptBuffer(order,sections) {
                 buildCustomerInfo(order.customer),
                 // buildSightTests(order.sightTest),
                 buildOrderItems(order,sections.items),
-                buildOrderTotals(order.pricing)
+                buildOrderTotals(order.pricing, order.payment, sections.totals)
             ]
         };
 

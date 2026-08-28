@@ -5,6 +5,11 @@ const SECTION_ROW_MAP = {
     'frame', 'ageGroup', 'lensType', 'lensSubtype', 'lensIndex',
     'design', 'coatings', 'extras', 'color', 'subtotal',
   ],
+
+  totals: [
+    'subtotal', 'promo', 'nhsgos3', 'checkoutDiscount', 'total',
+    'paymentStatus', 'transactions', 'amountPaid', 'balanceDue',
+  ],
   // totals: ['subtotal', 'discount', 'total'],
 };
 
@@ -21,6 +26,7 @@ exports.getConfig = async (req, res) => {
         data.sections[sectionKey].rows = Object.fromEntries(data.sections[sectionKey].rows);
       }
     }
+    console.log({data})
     res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -64,9 +70,9 @@ exports.updateRows = async (req, res) => {
       });
     }
 
-    const updates     = req.body;
+    const updates = req.body;
     const allowedRows = SECTION_ROW_MAP[section];
-    const invalid     = Object.keys(updates).filter(k => !allowedRows.includes(k));
+    const invalid = Object.keys(updates).filter(k => !allowedRows.includes(k));
 
     if (invalid.length) {
       return res.status(400).json({
@@ -81,7 +87,7 @@ exports.updateRows = async (req, res) => {
       const existing = config.sections[section].rows.get(rowKey) || {};
       config.sections[section].rows.set(rowKey, {
         enabled: values.enabled ?? existing.enabled ?? true,
-        label:   values.label   ?? existing.label   ?? rowKey,
+        label: values.label ?? existing.label ?? rowKey,
       });
     }
 
@@ -100,7 +106,7 @@ exports.resetConfig = async (req, res) => {
   try {
     await ReportConfig.deleteOne({ configKey: 'global' });
     const fresh = await ReportConfig.getGlobalConfig();
-    const data  = fresh.toObject({ virtuals: false });
+    const data = fresh.toObject({ virtuals: false });
     for (const sectionKey of ALLOWED_SECTIONS) {
       if (data.sections[sectionKey]?.rows instanceof Map) {
         data.sections[sectionKey].rows = Object.fromEntries(data.sections[sectionKey].rows);

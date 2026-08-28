@@ -1,49 +1,62 @@
 import { useNavigate } from "react-router-dom";
+import {
+  ShoppingCart,
+  Eye,
+  Palette,
+  Layers,
+  Ruler,
+  Puzzle,
+  Users,
+  Sparkles,
+  FileStack,
+  Megaphone,
+  Glasses,
+  FileCog,
+} from "lucide-react";
+
+const actions = [
+  { label: "Orders", path: "/orders", icon: ShoppingCart },
+  { label: "Sight Tests", path: "/sight-tests", icon: Eye },
+  { label: "Lenses", path: "/lenses", icon: Glasses },
+  { label: "Colors", path: "/colors", icon: Palette },
+  { label: "Coatings", path: "/coatings", icon: Layers },
+  { label: "Designs", path: "/designs", icon: Ruler },
+  { label: "Extras", path: "/extras", icon: Puzzle },
+  { label: "Age Groups", path: "/age-groups", icon: Users },
+  { label: "Recommended Lenses", path: "/recommended-lenses", icon: Sparkles },
+  { label: "Frame Summary", path: "/frame-summary-manager", icon: FileStack },
+  { label: "Promos", path: "/promo-manager", icon: Megaphone },
+  { label: "Report Config", path: "/report-config", icon: FileCog },
+];
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const sections = [
-    { label: "Orders", description: "Manage customer orders", path: "/orders" },
-    { label: "Lenses", description: "Lens management", path: "/lenses" },
-    { label: "Colors", description: "Manage lens colors", path: "/colors" },
-    { label: "Coatings", description: "Configure coatings", path: "/coatings" },
-    { label: "Designs", description: "Lens designs", path: "/designs" },
-    { label: "Extras", description: "Add lens extras", path: "/extras" },
-    { label: "Age Groups", description: "Manage age categories", path: "/age-groups" },
-    { label: "Recommended Lenses", description: "Configure recommendations", path: "/recommended-lenses" },
-    { label: "Frame Summary", description: "Summary of frames", path: "/frame-summary-manager" },
-    { label: "Promos", description: "Manage promotions", path: "/promo-manager" },
-    { label: "Sight Test", description: "Manage Sight Tests", path: "/sight-tests" },
-    { label: "Report Config", description: "Manage Order Reports", path: "/report-config" },
-
-
-  ];
-
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-2">
-            Manage your lens catalog, designs, and configurations
-          </p>
-        </div>
+      <header className="max-w-5xl mx-auto px-6 pt-8 pb-4">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">Quick actions</p>
       </header>
 
-      {/* Sections */}
-      <main className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sections.map((section) => (
-          <div
-            key={section.label}
-            onClick={() => navigate(section.path)}
-            className="cursor-pointer rounded-xl shadow-md border-2 border-gray-200 p-6 hover:border-black transition duration-300"
-          >
-            <h2 className="text-xl font-bold text-gray-900 mb-2 tracking-wide">{section.label}</h2>
-            <p className="text-gray-500">{section.description}</p>
-          </div>
-        ))}
+      <main className="max-w-5xl mx-auto px-6 pb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {actions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.path}
+                onClick={() => navigate(action.path)}
+                className="flex items-center gap-3 rounded-lg bg-white border border-gray-200 px-4 py-3 text-left shadow-sm hover:shadow-md hover:border-gray-300 active:scale-[0.98] transition"
+              >
+                <Icon size={18} className="text-gray-500 shrink-0" />
+                <span className="text-sm font-medium text-gray-800 truncate">
+                  {action.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </main>
     </div>
   );

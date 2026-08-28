@@ -36,10 +36,12 @@ const Layout = () => {
   const location = useLocation();
 
   return (
-    <>
+    <div className="lg:flex lg:min-h-screen">
       <Navbar currentPath={location.pathname} />
-      <Outlet />
-    </>
+      <main className="lg:flex-1 min-w-0">
+        <Outlet />
+      </main>
+    </div>
   );
 };
 
