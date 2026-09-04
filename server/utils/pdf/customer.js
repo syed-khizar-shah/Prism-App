@@ -1,4 +1,19 @@
 module.exports.buildCustomerInfo = (customer) => {
+
+    const formatAddress = (address) => {
+        if (!address) return "_";
+
+        const parts = [
+            address.street,
+            address.address,
+            address.city,
+            address.postalCode,
+            address.country
+        ].filter(Boolean); // drop empty/undefined parts
+
+        return parts.length ? parts.join(", ") : "_";
+    };
+
     return {
         stack: [
             {
@@ -15,7 +30,7 @@ module.exports.buildCustomerInfo = (customer) => {
                             {
                                 columns: [
                                     { text: "Name:", fontSize: 9, bold: true, width: 80 },
-                                    { text: customer.name? `${customer.name}` : "_", fontSize: 9, width: '*' }
+                                    { text: customer.name ? `${customer.name}` : "_", fontSize: 9, width: '*' }
                                 ],
                                 columnGap: 10,
                                 margin: [0, 0, 0, 4]
@@ -23,7 +38,7 @@ module.exports.buildCustomerInfo = (customer) => {
                             {
                                 columns: [
                                     { text: "Email:", fontSize: 9, bold: true, width: 80 },
-                                    { text: customer.email? `${customer.email}` : "_", fontSize: 9, width: '*' }
+                                    { text: customer.email ? `${customer.email}` : "_", fontSize: 9, width: '*' }
                                 ],
                                 columnGap: 10,
                                 margin: [0, 0, 0, 4]
@@ -31,7 +46,7 @@ module.exports.buildCustomerInfo = (customer) => {
                             {
                                 columns: [
                                     { text: "Phone:", fontSize: 9, bold: true, width: 80 },
-                                    { text: customer.phone? `${customer.phone}` : "_", fontSize: 9, width: '*' }
+                                    { text: customer.phone ? `${customer.phone}` : "_", fontSize: 9, width: '*' }
                                 ],
                                 columnGap: 10,
                                 margin: [0, 0, 0, 4]
@@ -39,7 +54,7 @@ module.exports.buildCustomerInfo = (customer) => {
                             {
                                 columns: [
                                     { text: "Address:", fontSize: 9, bold: true, width: 80 },
-                                    { text: customer.address? `${customer.address.address}` : "_", fontSize: 9, width: '*' }
+                                    { text: formatAddress(customer.address), fontSize: 9, width: '*' }
                                 ],
                                 columnGap: 10,
                                 margin: [0, 0, 0, 0]

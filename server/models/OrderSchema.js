@@ -39,6 +39,10 @@ const customerInfoSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  landline:{
+    type: String,
+    trim: true
+  },
   address: {
     street: String,
     city: String,

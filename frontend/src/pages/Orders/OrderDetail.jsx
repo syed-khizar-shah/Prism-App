@@ -1540,6 +1540,7 @@ export default function OrderDetail() {
         const res = await axios.get(
           `${PRISM_URL}/api/patient/search-lite?value=${search}`
         );
+        console.log({res});
         setResults(res.data || []);
       } catch (error) {
         console.error(error);
@@ -1633,6 +1634,25 @@ export default function OrderDetail() {
       setAddingPayment(false);
     }
   };
+
+  console.log({order})
+
+  const handleSelectPrismPatient = (p) => {
+    setOrder({
+      ...order,
+      customer: {
+        ...order.customer,
+        prismId: p._id,
+        phone: p.phone,
+        landline: p.landline,
+        address: p.address
+      },
+    });
+    setSearch('');
+    setSelectedPatientLabel(`${p.name} (ID: ${p.ID})`);
+    setResults([]);
+    setIsSelectingPatient(false);
+  }
 
   if (loading) {
     return (
@@ -1778,16 +1798,7 @@ export default function OrderDetail() {
                               <div
                                 key={p._id}
                                 className="px-3 py-2.5 text-sm hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0"
-                                onMouseDown={() => {
-                                  setOrder({
-                                    ...order,
-                                    customer: { ...order.customer, prismId: p._id },
-                                  });
-                                  setSearch('');
-                                  setSelectedPatientLabel(`${p.name} (ID: ${p.ID})`);
-                                  setResults([]);
-                                  setIsSelectingPatient(false);
-                                }}
+                                onMouseDown={() => handleSelectPrismPatient(p)}
                               >
                                 <span className="font-medium text-slate-800">{p.name}</span>{' '}
                                 <span className="text-slate-400">ID: {p.ID}</span>
@@ -1801,8 +1812,16 @@ export default function OrderDetail() {
 
                 <Field label="Email" icon={Mail}>{order.customer?.email}</Field>
                 <Field label="Phone" icon={Phone}>{order.customer?.phone}</Field>
+                <Field label="Landline" icon={Phone}>{order.customer?.landline}</Field>
                 <div className="sm:col-span-2">
-                  <Field label="Address" icon={MapPin}>{order.customer?.address?.address}</Field>
+                <div className='text-base font-medium text-slate-500'>
+                  Address
+                </div>
+                  <Field label="Street (address 1)" icon={MapPin}>{order.customer?.address?.street}</Field>
+                  <Field label="Address 2" icon={MapPin}>{order.customer?.address?.address}</Field>
+                  <Field label="City" icon={MapPin}>{order.customer?.address?.city}</Field>
+                  <Field label="Country" icon={MapPin}>{order.customer?.address?.country}</Field>
+                  <Field label="Postal Code" icon={MapPin}>{order.customer?.address?.postalCode}</Field>
                 </div>
               </div>
             </SectionCard>
