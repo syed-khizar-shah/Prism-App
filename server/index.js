@@ -37,7 +37,16 @@ app.use(
 )
 app.use(bodyParser.json())
 
-dbConnect()
+// dbConnect()
+
+app.use(async (req, res, next) => {
+	try {
+		await dbConnect()
+		next()
+	} catch (err) {
+		res.status(500).json({ error: 'Database connection failed' })
+	}
+})
 
 app.use("/api/user", userRoutes);
 
@@ -51,18 +60,18 @@ app.use('/api/extras', extrasRoutes);
 // new
 app.use('/api/upload', uploadRoutes)
 
-app.use('/api/age-groups',ageGroupRoutes)
+app.use('/api/age-groups', ageGroupRoutes)
 
 app.use('/api/recommended-lenses', recommendedLensRoutes);
 
-app.use('/api/lenses',lensRoutes)
+app.use('/api/lenses', lensRoutes)
 
-app.use('/api/designs',designRoutes)
+app.use('/api/designs', designRoutes)
 
-app.use('/api/frame-summary',frameSummaryRoutes)
-app.use('/api/promos',promosRoutes)
+app.use('/api/frame-summary', frameSummaryRoutes)
+app.use('/api/promos', promosRoutes)
 app.use('/api/orders', orderRoutes)
-app.use('/api/sight-tests',sightTestRoutes);
+app.use('/api/sight-tests', sightTestRoutes);
 app.use('/api/report-config', reportConfigRoutes);
 
 
@@ -71,14 +80,14 @@ app.use('/api/report-config', reportConfigRoutes);
 
 
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Prism App Admin API" });
+	res.json({ message: "Welcome to Prism App Admin API" });
 });
 
 app.use((req, res) => {
-  res.status(404).json({error:'not found'})
+	res.status(404).json({ error: 'not found' })
 })
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
-  console.log(`Server started on port ${port}`)
+	console.log(`Server started on port ${port}`)
 })
