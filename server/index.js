@@ -120,3 +120,8 @@ const port = process.env.PORT || 3000
 app.listen(port, () => {
 	console.log(`Server started on port ${port}`)
 })
+
+app.use((err, req, res, next) => {
+	console.error('Unhandled error:', err)
+	res.status(500).json({ error: 'Server error' })
+})

@@ -15,7 +15,6 @@ const authMiddleware = async (req, res, next) => {
     
     // Add user from payload
     req.user = decoded;
-    console.log(req.user);
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
