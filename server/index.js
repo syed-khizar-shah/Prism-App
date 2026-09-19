@@ -28,6 +28,23 @@ const reportConfigRoutes = require('./routes/reportConfigRoutes')
 
 const app = express()
 
+app.use((req, res, next) => {
+	const start = Date.now()
+	res.on('finish', () => {
+		console.log(JSON.stringify({
+			method: req.method,
+			path: req.originalUrl,
+			status: res.statusCode,
+			ms: Date.now() - start,
+			ip: req.headers['x-forwarded-for'],
+			country: req.headers['x-vercel-ip-country'],
+			ua: req.headers['user-agent'],
+			origin: req.headers.origin,
+		}))
+	})
+	next()
+})
+
 app.use(
 	cors({
 		origin: '*',
