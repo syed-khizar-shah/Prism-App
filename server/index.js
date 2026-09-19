@@ -24,8 +24,6 @@ const sightTestRoutes = require('./routes/sightTestRoutes');
 const reportConfigRoutes = require('./routes/reportConfigRoutes')
 
 
-
-
 const app = express()
 
 app.use((req, res, next) => {
@@ -70,6 +68,7 @@ app.use(async (req, res, next) => {
 		await dbConnect()
 		next()
 	} catch (err) {
+		console.error('DB connect failed:', err.message)
 		res.status(500).json({ error: 'Database connection failed' })
 	}
 })
