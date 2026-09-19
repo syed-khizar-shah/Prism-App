@@ -39,6 +39,15 @@ app.use(bodyParser.json())
 
 // dbConnect()
 
+app.get('/api/health', (req, res) => {
+	res.json({
+		ok: true,
+		time: new Date().toISOString(),
+		ip: req.headers['x-forwarded-for'],
+		country: req.headers['x-vercel-ip-country'],
+	})
+})
+
 app.use(async (req, res, next) => {
 	try {
 		await dbConnect()
@@ -46,6 +55,10 @@ app.use(async (req, res, next) => {
 	} catch (err) {
 		res.status(500).json({ error: 'Database connection failed' })
 	}
+})
+
+app.get('/api/health-db', (req, res) => {
+	res.json({ ok: true, db: 'connected' })
 })
 
 app.use("/api/user", userRoutes);
