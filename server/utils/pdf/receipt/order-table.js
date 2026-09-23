@@ -214,7 +214,7 @@
 // };
 
 // ----------------------------------------------------------------------------------------------
-const { formatCurrency } = require("./helpers")
+const { formatCurrency } = require("../shared/helpers")
 
 /**
  * Helper function to validate order object structure

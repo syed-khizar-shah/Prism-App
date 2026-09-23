@@ -416,7 +416,7 @@
 //     };
 // }
 
-const { formatCurrency } = require("./helpers")
+const { formatCurrency } = require("../shared/helpers")
 
 /**
  * Reads a Map or plain object of row configs into a plain lookup object.

@@ -59,6 +59,13 @@ class OrdersAPI {
     return response.data; // Axios returns the blob directly in response.data
   }
 
+  static async downloadOrderDetail(id) {
+    const response = await axiosInstance.get(`/api/orders/${id}/order-detail-pdf`, {
+      responseType: 'blob' // important to get the file as a blob
+    });
+    return response.data; // Axios returns the blob directly in response.data
+  }
+
   static async addPayment(id, transaction) {
     const response = await axiosInstance.post(`/api/orders/${id}/payments`, transaction);
     const data = response.data;

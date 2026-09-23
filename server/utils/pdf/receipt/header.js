@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs")
 
-const logoPath = path.join(__dirname, '../../assets/logo.png');
+const logoPath = path.join(__dirname, '../../../assets/logo.png');
 const logoBase64 = fs.readFileSync(logoPath).toString('base64');
 
 module.exports.buildHeader = (order) => {

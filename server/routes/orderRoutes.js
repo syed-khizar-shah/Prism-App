@@ -11,7 +11,8 @@ const {
   updateOrderStatus,
   searchOrders,
   generateReceipt,
-  getOrderByPrismId
+  getOrderByPrismId,
+  generateOrderDetailPdf
 } = require('../controllers/orderController');
 
 // Create a new order
@@ -40,6 +41,9 @@ router.patch('/:id/status', updateOrderStatus);
 
 // Generate and download receipt PDF for an order
 router.get('/:id/receipt', generateReceipt);
+// generate and download order detail
+router.get('/:id/order-detail-pdf', generateOrderDetailPdf);
+
 
 // Search orders
 router.get('/search', searchOrders);

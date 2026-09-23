@@ -1,4 +1,4 @@
-const { formatCurrency } = require("./helpers")
+const { formatCurrency } = require("../shared/helpers")
 
 /**
  * Build totals section for receipt

@@ -341,7 +341,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Eye, FileText, Calendar, User, Package, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Eye, FileText, Calendar, User, Package, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 import OrdersAPI from './OrdersAPI';
 
 const STATUS_STYLES = {
@@ -433,7 +433,7 @@ export default function OrdersList() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `order-${orderId || id}.pdf`;
+      a.download = `receipt-${orderId || id}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -443,9 +443,26 @@ export default function OrdersList() {
     }
   };
 
+
+  const handleOrderDownload = async (id, orderId) => {
+    try {
+      const blob = await OrdersAPI.downloadReceipt(id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `order-${orderId || id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(e.message || 'Failed to download order');
+    }
+  };
+
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto py-8 px-2 md:px-0">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
@@ -576,7 +593,8 @@ export default function OrdersList() {
                           {order.orderDate ? new Date(order.orderDate).toLocaleTimeString() : ''}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td>
+
                         <div className="flex justify-end gap-1">
                           <Link
                             to={`/orders/${order._id}`}
@@ -592,8 +610,16 @@ export default function OrdersList() {
                           >
                             <FileText className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => handleOrderDownload(order._id, order.orderId)}
+                            className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-md transition-colors"
+                            title="Download order sheet"
+                          >
+                            <ClipboardList className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
+
                     </tr>
                   ))}
                   {orders.length === 0 && (

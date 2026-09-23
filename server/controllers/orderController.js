@@ -1,7 +1,7 @@
 const Order = require('../models/OrderSchema');
 const ReportConfig = require('../models/reportConfig');
 
-const { generateReceiptBuffer } = require('../utils/pdf/pdf');
+const { generateReceiptBuffer, generateOrderDetailPdfBuffer } = require('../utils/pdf/pdf');
 const pdfService = require('../services/pdfService');
 const { getConfig } = require('./reportConfigController');
 const { MONEY_EPSILON, round2 } = require('../utils/money');
@@ -572,6 +572,32 @@ const generateReceipt = async (req, res) => {
   }
 };
 
+const generateOrderDetailPdf = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [order, config] = await Promise.all([
+      Order.findById(id),
+      ReportConfig.getGlobalConfig(),
+    ]);
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    const pdfBuffer = await generateOrderDetailPdfBuffer(order, config.sections);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="order-${order.orderId}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.send(pdfBuffer);
+
+  } catch (error) {
+    console.error('Error generating order detail pdf:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate order detail pdf', details: error.message });
+  }
+};
+
 
 
 module.exports = {
@@ -585,5 +611,6 @@ module.exports = {
   updateOrder,
   updateOrderStatus,
   searchOrders,
-  generateReceipt
+  generateReceipt,
+  generateOrderDetailPdf
 };
