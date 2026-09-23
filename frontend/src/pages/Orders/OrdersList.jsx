@@ -446,7 +446,7 @@ export default function OrdersList() {
 
   const handleOrderDownload = async (id, orderId) => {
     try {
-      const blob = await OrdersAPI.downloadReceipt(id);
+      const blob = await OrdersAPI.downloadOrderDetail(id);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
